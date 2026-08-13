@@ -55,32 +55,6 @@
           </div>
         </div>
         
-        <!-- Dropdown Menu -->
-        <div class="constellation-dropdown hidden" id="constellationDropdown">
-          <div class="rewards-header-card">
-            <div class="rewards-icon">
-              <!-- Simple Orion SVG -->
-              <svg viewBox="0 0 100 100" width="40" height="40" fill="none" stroke="#00f2fe" stroke-width="2">
-                <circle cx="20" cy="20" r="2" fill="#FA9D28" />
-                <circle cx="30" cy="40" r="2" fill="#FA9D28" />
-                <circle cx="15" cy="50" r="2" fill="#00f2fe" />
-                <circle cx="35" cy="60" r="2" fill="#FA9D28" />
-                <circle cx="25" cy="80" r="2" fill="#00f2fe" />
-                <circle cx="45" cy="75" r="2" fill="#FA9D28" />
-                <path d="M20,20 L30,40 L15,50 L35,60 L25,80 M35,60 L45,75" />
-              </svg>
-            </div>
-            <div class="rewards-titles">
-              <h4>ORION'S REWARDS</h4>
-              <p>Compact constellation showing the next 3 unlockable fitness achievements.</p>
-            </div>
-          </div>
-          
-          <h4 class="section-title">UPCOMING ACHIEVEMENTS</h4>
-          <div class="milestone-list" id="milestoneList">
-            <!-- Populated via JS -->
-          </div>
-        </div>
       </div>
 
 
@@ -99,6 +73,11 @@
             <!-- Overlay Score (Focus Mode Only) -->
             <div id="overlayScore" class="overlay-score">
               <span id="overlayScoreValue">0</span>
+            </div>
+
+            <!-- Overlay Timer (Only when active) -->
+            <div id="overlayTimer" class="overlay-timer hidden">
+              <span id="overlayTimerValue">01:00</span>
             </div>
 
             <!-- Status Badge Overlay -->
@@ -139,185 +118,167 @@
               <span id="overheadValue" class="value">--</span>
             </div>
           </div>
+
+          <!-- Action Buttons Below Camera -->
+          <div class="camera-controls-bottom">
+            
+            <div class="segmented-control" id="exerciseSelect">
+              <button class="segment-btn active" data-value="claps">Half Jumping Jacks</button>
+              <button class="segment-btn" data-value="circles">Arm Circles</button>
+            </div>
+
+            <div class="pill-group" id="timerLengthSelect">
+              <button class="pill-btn" data-value="30">30s</button>
+              <button class="pill-btn active" data-value="60">1m</button>
+              <button class="pill-btn" data-value="120">2m</button>
+              <button class="pill-btn" data-value="300">5m</button>
+            </div>
+            <button id="timerBtn" class="btn btn-secondary icon-btn" title="1 Min Challenge">
+              <span>⏱️</span> <span id="timerBtnText">Start</span>
+            </button>
+
+            <button id="soundToggleBtn" class="btn btn-secondary icon-btn" title="Toggle Sound">
+              <span id="soundIcon">🔊</span> Audio
+            </button>
+            <button id="resetScoreBtn" class="btn btn-secondary" title="Reset Score">
+              <span>🔄</span> Reset
+            </button>
+            <button id="cameraToggleBtn" class="btn btn-primary" title="Start/Stop Camera">
+              <span class="btn-icon">📷</span> <span id="cameraBtnText">Start Camera</span>
+            </button>
+          </div>
         </div>
       </section>
 
-      <!-- Right Side Actions (Desktop) / Bottom (Mobile) -->
-      <div class="header-actions right-side-actions">
-        <div class="timer-display" id="timerDisplay">
-          <span id="timerValue">01:00</span>
-        </div>
-        <select id="exerciseSelect" class="timer-select">
-          <option value="claps" selected>Overhead Claps</option>
-          <option value="circles">Arm Circles</option>
-        </select>
-        <select id="timerLengthSelect" class="timer-select">
-          <option value="30">30s</option>
-          <option value="60" selected>1m</option>
-          <option value="120">2m</option>
-          <option value="300">5m</option>
-        </select>
-        <button id="timerBtn" class="btn btn-secondary icon-btn" title="1 Min Challenge">
-          <span>⏱️</span> <span id="timerBtnText">Start</span>
-        </button>
-        <button id="dashboardToggleBtn" class="btn btn-secondary icon-btn" title="Toggle Dashboard">
-          <span id="dashboardIcon">📊</span> <span id="dashboardText">Dashboard</span>
-        </button>
-        <button id="soundToggleBtn" class="btn btn-secondary icon-btn" title="Toggle Sound">
-          <span id="soundIcon">🔊</span> Audio
-        </button>
-        <button id="resetScoreBtn" class="btn btn-secondary" title="Reset Score">
-          <span>🔄</span> Reset
-        </button>
-        <button id="cameraToggleBtn" class="btn btn-primary" title="Start/Stop Camera">
-          <span class="btn-icon">📷</span> <span id="cameraBtnText">Start Camera</span>
-        </button>
-      </div>
-
-      <!-- Right / Bottom: Dashboard Panel (Now a Side Drawer) -->
-      <aside class="dashboard-section side-drawer hidden" id="dashboardDrawer">
-        <!-- Main Score Counter Display -->
-        <div class="score-card" id="scoreCard">
-          <div class="score-card-bg-glow"></div>
-          <span class="score-label">CURRENT SCORE</span>
-          <div class="score-display">
-            <span id="scoreValue">0</span>
-          </div>
-          <p class="score-hint" id="scoreHint">Clap both hands high above your head to score +1</p>
+      <!-- Right Sidebar (Tabbed) -->
+      <aside class="right-sidebar">
+        
+        <!-- Tab List -->
+        <div class="sidebar-tablist" role="tablist">
+          <button class="sidebar-tab active" role="tab" aria-selected="true" data-target="instructionsTab">Instructions</button>
+          <button class="sidebar-tab" role="tab" aria-selected="false" data-target="rewardsTab">Rewards</button>
         </div>
 
-        <!-- Real-time Telemetry & Calibration Gauges -->
-        <div class="telemetry-card">
-          <h3>Gesture Telemetry</h3>
-
-          <!-- Meter 1 -->
-          <div class="meter-group">
-            <div class="meter-label-row">
-              <span id="meterOneLabel">Wrist Proximity (Clap)</span>
-              <span id="meterOneValue">0%</span>
-            </div>
-            <div class="meter-bar-track">
-              <div id="meterOneFill" class="meter-bar-fill meter-blue" style="width: 0%;"></div>
-              <div id="meterOneMarker" class="meter-threshold-marker" style="left: 15%" title="Target Threshold"></div>
-            </div>
-            <div class="meter-subtext" id="meterOneSubtext">Clap when distance &lt; 0.15</div>
-          </div>
-
-          <!-- Meter 2 -->
-          <div class="meter-group">
-            <div class="meter-label-row">
-              <span id="meterTwoLabel">Elevation (Y-Axis)</span>
-              <span id="meterTwoValue" class="elevation-status">NO</span>
-            </div>
-            <div class="meter-bar-track">
-              <div id="meterTwoFill" class="meter-bar-fill meter-accent" style="width: 0%;"></div>
-              <div id="meterTwoMarker" class="meter-threshold-marker" style="left: 50%" title="Target Threshold"></div>
-            </div>
-            <div class="meter-subtext" id="meterTwoSubtext">Both wrists must rise above nose (Y &lt; Nose Y)</div>
-          </div>
-        </div>
-
-        <!-- Instruction Guide Card -->
-        <div class="instructions-card">
-          <h3>How to Play</h3>
+        <!-- Tab 1: Instructions (Score + Telemetry + How to Play) -->
+        <div class="tab-panel active" id="instructionsTab" role="tabpanel">
           
-          <div id="instructionsClaps">
-            <div class="demo-animation-container">
-              <svg class="demo-figure" viewBox="0 0 100 120">
-                <defs>
-                  <filter id="demo-glow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="2" result="blur" />
-                    <feMerge>
-                      <feMergeNode in="blur" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                </defs>
-                <g filter="url(#demo-glow)">
-                  <circle cx="50" cy="25" r="10" fill="none" stroke="var(--primary)" stroke-width="3"/>
-                  <line x1="50" y1="35" x2="50" y2="70" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/>
-                  <line x1="50" y1="70" x2="35" y2="105" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/>
-                  <line x1="50" y1="70" x2="65" y2="105" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/>
-                  <g class="demo-arm left-arm">
-                    <line x1="50" y1="42" x2="25" y2="70" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/>
-                  </g>
-                  <g class="demo-arm right-arm">
-                    <line x1="50" y1="42" x2="75" y2="70" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/>
-                  </g>
-                  <g class="clap-spark">
-                    <line x1="50" y1="8" x2="50" y2="0" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="46" y1="10" x2="40" y2="4" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="54" y1="10" x2="60" y2="4" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
-                  </g>
-                </g>
-              </svg>
+          <!-- Main Score Counter Display -->
+          <div class="score-card" id="scoreCard">
+            <div class="score-card-bg-glow"></div>
+            <span class="score-label">CURRENT SCORE</span>
+            <div class="score-display">
+              <span id="scoreValue">0</span>
+            </div>
+            <p class="score-hint" id="scoreHint">Perform a half jumping jack to score +1</p>
+          </div>
+          
+          <!-- Real-time Telemetry & Calibration Gauges -->
+          <div class="telemetry-card">
+            <h3>Gesture Telemetry</h3>
+
+            <!-- Meter 1 -->
+            <div class="meter-group">
+              <div class="meter-label-row">
+                <span id="meterOneLabel">Wrist Proximity (Clap)</span>
+                <span id="meterOneValue">0%</span>
+              </div>
+              <div class="meter-bar-track">
+                <div id="meterOneFill" class="meter-bar-fill meter-blue" style="width: 0%;"></div>
+                <div id="meterOneMarker" class="meter-threshold-marker" style="left: 15%" title="Target Threshold"></div>
+              </div>
+              <div class="meter-subtext" id="meterOneSubtext">Clap when distance &lt; 0.15</div>
             </div>
 
-            <ol class="steps-list">
-              <li>
-                <span class="step-num">1</span>
-                <span>Allow webcam access and step back so your head and hands are visible.</span>
-              </li>
-              <li>
-                <span class="step-num">2</span>
-                <span>Raise both hands completely <strong>above your nose level</strong>.</span>
-              </li>
-              <li>
-                <span class="step-num">3</span>
-                <span>Bring your wrists together in a <strong>clapping motion</strong>.</span>
-              </li>
-              <li>
-                <span class="step-num">4</span>
-                <span>Lower your hands to reset before clapping again!</span>
-              </li>
-            </ol>
+            <!-- Meter 2 -->
+            <div class="meter-group">
+              <div class="meter-label-row">
+                <span id="meterTwoLabel">Wrists Above Nose Height</span>
+                <span id="meterTwoValue" class="elevation-status">NO</span>
+              </div>
+              <div class="meter-bar-track">
+                <div id="meterTwoFill" class="meter-bar-fill meter-accent" style="width: 0%;"></div>
+                <div id="meterTwoMarker" class="meter-threshold-marker" style="left: 50%" title="Target Threshold"></div>
+              </div>
+              <div class="meter-subtext" id="meterTwoSubtext">Both wrists must rise above nose (Y &lt; Nose Y)</div>
+            </div>
+          </div>
+          
+          <!-- Next Upcoming Reward (Dynamic) -->
+          <div id="nextRewardContainer" class="telemetry-card">
+            <h3>Next Reward</h3>
+            <div id="nextRewardContent">
+              <!-- Populated by JS -->
+            </div>
           </div>
 
-          <div id="instructionsCircles" class="hidden">
-            <div class="demo-animation-container">
-              <svg class="demo-figure" viewBox="0 0 100 120">
-                <g filter="url(#demo-glow)">
-                  <circle cx="50" cy="25" r="10" fill="none" stroke="var(--primary)" stroke-width="3"/>
-                  <line x1="50" y1="35" x2="50" y2="70" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/>
-                  <line x1="50" y1="70" x2="35" y2="105" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/>
-                  <line x1="50" y1="70" x2="65" y2="105" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/>
-                  <g class="demo-arm left-arm-circle">
-                    <line x1="50" y1="42" x2="15" y2="42" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/>
-                  </g>
-                  <g class="demo-arm right-arm-circle">
-                    <line x1="50" y1="42" x2="85" y2="42" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/>
-                  </g>
-                  <!-- Rotation Sparks -->
-                  <g class="circle-spark left-spark">
-                    <circle cx="15" cy="42" r="3" fill="var(--accent)"/>
-                  </g>
-                  <g class="circle-spark right-spark">
-                    <circle cx="85" cy="42" r="3" fill="var(--accent)"/>
-                  </g>
-                </g>
-              </svg>
+          <!-- Instruction Guide Card -->
+          <div class="instructions-card">
+            <h3>How to Play</h3>
+            
+            <div id="instructionsClaps">
+              <ol class="steps-list">
+                <li>
+                  <span class="step-num">1</span>
+                  <span>Allow webcam access and step back so your head and hands are visible.</span>
+                </li>
+                <li>
+                  <span class="step-num">2</span>
+                  <span>Raise both hands completely <strong>above your nose level</strong>.</span>
+                </li>
+                <li>
+                  <span class="step-num">3</span>
+                  <span>Bring your wrists together in a <strong>clapping motion</strong>.</span>
+                </li>
+                <li>
+                  <span class="step-num">4</span>
+                  <span>Lower your hands to reset before clapping again!</span>
+                </li>
+              </ol>
             </div>
 
-            <ol class="steps-list">
-              <li>
-                <span class="step-num">1</span>
-                <span>Allow webcam access and step back.</span>
-              </li>
-              <li>
-                <span class="step-num">2</span>
-                <span>Extend your arms straight out.</span>
-              </li>
-              <li>
-                <span class="step-num">3</span>
-                <span>Make large, continuous circles with your arms.</span>
-              </li>
-              <li>
-                <span class="step-num">4</span>
-                <span>Complete a full 360° rotation to score!</span>
-              </li>
-            </ol>
+            <div id="instructionsCircles" class="hidden">
+              <ol class="steps-list">
+                <li>
+                  <span class="step-num">1</span>
+                  <span>Allow webcam access and step back.</span>
+                </li>
+                <li>
+                  <span class="step-num">2</span>
+                  <span>Extend your arms <strong>straight out</strong>.</span>
+                </li>
+                <li>
+                  <span class="step-num">3</span>
+                  <span>Make <strong>large, continuous circles</strong> with your arms.</span>
+                </li>
+                <li>
+                  <span class="step-num">4</span>
+                  <span>Complete a full 360° rotation to score!</span>
+                </li>
+              </ol>
+            </div>
           </div>
         </div>
+
+        <!-- Tab 2: Rewards -->
+        <div class="tab-panel hidden" id="rewardsTab" role="tabpanel">
+          
+          <!-- Score Counter Display for Rewards Tab -->
+          <div class="score-card" id="rewardsScoreCard">
+            <div class="score-card-bg-glow"></div>
+            <span class="score-label">CURRENT SCORE</span>
+            <div class="score-display">
+              <span id="rewardsScoreValue">0</span>
+            </div>
+          </div>
+
+          <div class="rewards-panel" id="rewardsPanel">
+            <h4 class="section-title" style="margin-top:0; text-align: center;">CONSTELLATION ALBUM</h4>
+            <div class="sticker-book-grid" id="milestoneList">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+        </div>
+
       </aside>
     </main>
   </div>

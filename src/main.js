@@ -51,6 +51,7 @@ function updateProgressionUI() {
   const xpText = document.getElementById('xpText');
   const progressPath = document.getElementById('progressPath');
   const milestoneList = document.getElementById('milestoneList');
+  const nextRewardContent = document.getElementById('nextRewardContent');
   
   if(levelText) levelText.textContent = `Level ${level}`;
   if(xpText) xpText.textContent = `${xp}/${xpPerLevel} XP`;
@@ -63,49 +64,74 @@ function updateProgressionUI() {
 
   if(milestoneList) {
     milestoneList.innerHTML = '';
+    let nextRewardFound = false;
     
     milestonesData.forEach(m => {
-      const isUnlocked = score >= m.target;
+      const isCompleted = score >= m.target;
       const progressValue = Math.min(score, m.target);
       const progressPercent = (progressValue / m.target) * 100;
       
+      let stateClass = 'locked';
+      let stateText = 'Locked';
+      if (isCompleted) {
+        stateClass = 'completed';
+        stateText = 'Claimed';
+      } else if (progressValue > 0) {
+        stateClass = 'in-progress';
+        stateText = 'In Progress';
+      }
+
+      // Convert hex to rgb for css variable
+      const hex = m.color.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      
       const item = document.createElement('div');
-      item.className = `milestone-item ${isUnlocked ? 'unlocked' : ''}`;
-      // Use style override for the category color
-      item.style.setProperty('--primary', m.color);
+      item.className = `milestone-item ${stateClass}`;
+      item.style.setProperty('--card-accent', m.color);
+      item.style.setProperty('--card-rgb', `${r}, ${g}, ${b}`);
+      
       item.innerHTML = `
-        <div class="milestone-icon" style="color: ${m.color}; border-color: ${m.color}40;">
+        <div class="milestone-icon">
           ${m.iconSVG}
         </div>
         <div class="milestone-info">
           <div class="milestone-info-header">
             <h5>${m.name}</h5>
-            <span class="milestone-progress-text">${progressValue}/${m.target} ${m.desc}</span>
-            <span class="milestone-progress-text">${Math.floor(progressPercent)}%</span>
+            <span class="milestone-status-badge">${stateText}</span>
           </div>
           <div class="milestone-progress-track">
             <div class="milestone-progress-fill" style="width: ${progressPercent}%; background: ${m.color}; box-shadow: 0 0 8px ${m.color};"></div>
           </div>
-          <div class="milestone-cluster">${m.cluster}</div>
-        </div>
-        <div class="milestone-sticker" style="color: ${m.color};">
-          ${m.constellationSVG}
+          <div class="milestone-info-header" style="margin-top: -0.1rem;">
+            <span class="milestone-progress-text">${m.cluster}</span>
+            <span class="milestone-progress-text">${progressValue}/${m.target}</span>
+          </div>
         </div>
       `;
       milestoneList.appendChild(item);
+
+      if (!isCompleted && !nextRewardFound && nextRewardContent) {
+        nextRewardContent.innerHTML = '';
+        nextRewardContent.appendChild(item.cloneNode(true));
+        nextRewardFound = true;
+      }
     });
+
+    if (!nextRewardFound && nextRewardContent) {
+      nextRewardContent.innerHTML = '<div style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 1rem 0;">All achievements unlocked!</div>';
+    }
   }
 }
 let isHandsClappedAboveHead = false;
 let currentExercise = 'claps'; // 'claps' or 'circles'
 
 // Circle State
-let leftAccumulatedAngle = 0;
-let rightAccumulatedAngle = 0;
-let leftPrevAngle = null;
-let rightPrevAngle = null;
-let leftPrevWrist = null;
-let rightPrevWrist = null;
+let leftWristHistory = [];
+let rightWristHistory = [];
+let leftQuadrantSeq = [];
+let rightQuadrantSeq = [];
 
 let soundEnabled = true;
 let isCameraActive = false;
@@ -134,23 +160,26 @@ const soundIcon = document.getElementById('soundIcon');
 
 const timerBtn = document.getElementById('timerBtn');
 const timerBtnText = document.getElementById('timerBtnText');
-const timerDisplay = document.getElementById('timerDisplay');
-const timerValue = document.getElementById('timerValue');
+const overlayTimer = document.getElementById('overlayTimer');
+const overlayTimerValue = document.getElementById('overlayTimerValue');
 let timerInterval = null;
 let timeLeft = 60;
 let isTimerActive = false;
 
-const timerLengthSelect = document.getElementById('timerLengthSelect');
+// Segmented controls
+const segmentBtns = document.querySelectorAll('.segment-btn');
+const pillBtns = document.querySelectorAll('.pill-btn');
+
 const keyboardHintOverlay = document.getElementById('keyboardHintOverlay');
 const keyboardHintText = document.getElementById('keyboardHintText');
 
-const dashboardToggleBtn = document.getElementById('dashboardToggleBtn');
-const dashboardDrawer = document.getElementById('dashboardDrawer');
-const constellationBtn = document.getElementById('constellationBtn');
-const constellationDropdown = document.getElementById('constellationDropdown');
+// Sidebar Tabs
+const sidebarTabs = document.querySelectorAll('.sidebar-tab');
+const tabPanels = document.querySelectorAll('.tab-panel');
 
 const overlayScore = document.getElementById('overlayScore');
 const overlayScoreValue = document.getElementById('overlayScoreValue');
+const rewardsScoreValue = document.getElementById('rewardsScoreValue');
 const appContainer = document.getElementById('app');
 
 const poseStatusBadge = document.getElementById('poseStatusBadge');
@@ -179,6 +208,7 @@ const scoreHint = document.getElementById('scoreHint');
 const exerciseSelect = document.getElementById('exerciseSelect');
 const instructionsClaps = document.getElementById('instructionsClaps');
 const instructionsCircles = document.getElementById('instructionsCircles');
+const quickInstructionText = document.getElementById('quickInstructionText');
 
 // Web Audio API Synthesizer
 let audioCtx = null;
@@ -274,13 +304,14 @@ function updateAndDrawParticles() {
 
 // Update Score Display
 function incrementScore(particleX, particleY) {
-  // Only block scoring if the timer challenge just finished and hasn't been reset
-  if (!isTimerActive && timerValue.textContent === "TIME'S UP!") return;
+  // Optional: prevent scoring when timer hasn't started
+  if (!isTimerActive && overlayTimerValue.textContent === "TIME'S UP!") return;
   console.log("Scoring! Current score:", score + 1);
 
   score += 1;
   scoreValue.textContent = score;
   overlayScoreValue.textContent = score;
+  if (rewardsScoreValue) rewardsScoreValue.textContent = score;
   
   // Progression
   xp += xpPerClap;
@@ -448,20 +479,6 @@ function trackOverheadClaps(landmarks) {
   const PROXIMITY_THRESHOLD = 0.15;
   const isClapped = wristDistance < PROXIMITY_THRESHOLD;
 
-  // Visual Cue: Draw Target Zone for Claps
-  ctx.save();
-  ctx.beginPath();
-  const targetX = nose.x * canvas.width;
-  const targetY = (nose.y * canvas.height) - (canvas.height * 0.15); // Above the head
-  ctx.arc(targetX, targetY, 40, 0, 2 * Math.PI);
-  ctx.strokeStyle = isOverhead ? 'rgba(250, 157, 40, 0.8)' : 'rgba(78, 142, 255, 0.4)';
-  ctx.lineWidth = 4;
-  ctx.setLineDash([10, 10]);
-  ctx.stroke();
-  ctx.fillStyle = 'rgba(78, 142, 255, 0.1)';
-  ctx.fill();
-  ctx.restore();
-
   distValue.textContent = wristDistance.toFixed(3);
   overheadValue.textContent = isOverhead ? 'YES' : 'NO';
   
@@ -492,7 +509,7 @@ function trackOverheadClaps(landmarks) {
     poseStatusBadge.className = 'status-badge status-active';
     statusText.textContent = 'SCORED! 🙌 Lower hands or separate them to score again.';
     targetBanner.classList.remove('hidden');
-    targetBanner.innerHTML = '<span>🙌 HANDS CLAPPED ABOVE HEAD DETECTED</span>';
+    targetBanner.innerHTML = '<span>🙌 HALF JUMPING JACK DETECTED</span>';
   } else {
     if (!isOverhead || !isClapped) {
       isHandsClappedAboveHead = false;
@@ -501,11 +518,10 @@ function trackOverheadClaps(landmarks) {
     poseStatusBadge.className = 'status-badge status-tracking';
 
     if (isOverhead && !isClapped) {
-      statusText.textContent = 'Hands Above Head! Bring wrists closer to clap!';
+      statusText.textContent = 'Hands Above Head! Bring wrists closer together!';
     } else if (!isOverhead && isClapped) {
       statusText.textContent = 'Wrists close, but raise hands ABOVE NOSE level!';
     } else {
-      statusText.textContent = 'Tracking Pose - Clap hands high above head!';
     }
   }
 }
@@ -521,107 +537,134 @@ function trackArmCircles(landmarks) {
     return;
   }
 
-  const EXTENSION_THRESHOLD = 0.2; // roughly extended arm
-  const PI2 = 2 * Math.PI;
+  // Draw target height line (Visual Cue)
+  const targetY = Math.min(leftShoulder.y, rightShoulder.y) * canvas.height;
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(0, targetY);
+  ctx.lineTo(canvas.width, targetY);
+  ctx.strokeStyle = 'rgba(250, 157, 40, 0.5)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([10, 10]);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(250, 157, 40, 0.8)';
+  ctx.font = '16px Outfit, sans-serif';
+  ctx.fillText('TARGET HEIGHT', 20, targetY - 10);
+  ctx.restore();
 
-  const leftDist = Math.hypot(leftWrist.x - leftShoulder.x, leftWrist.y - leftShoulder.y);
-  const rightDist = Math.hypot(rightWrist.x - rightShoulder.x, rightWrist.y - rightShoulder.y);
+  leftWristHistory.push({x: leftWrist.x, y: leftWrist.y});
+  if (leftWristHistory.length > 30) leftWristHistory.shift();
+  
+  rightWristHistory.push({x: rightWrist.x, y: rightWrist.y});
+  if (rightWristHistory.length > 30) rightWristHistory.shift();
 
-  const isLeftExtended = leftDist > EXTENSION_THRESHOLD;
-  const isRightExtended = rightDist > EXTENSION_THRESHOLD;
+  const processCircle = (history, seq, isRight) => {
+    if (history.length < 15) return { progress: 0, valid: false, reason: 'Tracking...' };
 
-  // Velocity angle tracking
-  if (isLeftExtended && leftPrevWrist) {
-    const vx = leftWrist.x - leftPrevWrist.x;
-    const vy = leftWrist.y - leftPrevWrist.y;
-    // Only accumulate if moving enough to avoid jitter noise
-    if (Math.hypot(vx, vy) > 0.005) {
-      let velAngle = Math.atan2(vy, vx);
-      if (leftPrevAngle !== null) {
-        let delta = velAngle - leftPrevAngle;
-        if (delta > Math.PI) delta -= PI2;
-        if (delta < -Math.PI) delta += PI2;
-        leftAccumulatedAngle += delta;
-      }
-      leftPrevAngle = velAngle;
+    let minX = 1, maxX = 0, minY = 1, maxY = 0;
+    for (let p of history) {
+      if (p.x < minX) minX = p.x;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.y > maxY) maxY = p.y;
     }
-  } else {
-    leftPrevAngle = null;
-  }
-  leftPrevWrist = { x: leftWrist.x, y: leftWrist.y };
 
-  if (isRightExtended && rightPrevWrist) {
-    const vx = rightWrist.x - rightPrevWrist.x;
-    const vy = rightWrist.y - rightPrevWrist.y;
-    if (Math.hypot(vx, vy) > 0.005) {
-      let velAngle = Math.atan2(vy, vx);
-      if (rightPrevAngle !== null) {
-        let delta = velAngle - rightPrevAngle;
-        if (delta > Math.PI) delta -= PI2;
-        if (delta < -Math.PI) delta += PI2;
-        rightAccumulatedAngle += delta;
-      }
-      rightPrevAngle = velAngle;
+    const width = maxX - minX;
+    const height = maxY - minY;
+    
+    if (width < 0.1 || height < 0.1) {
+      seq.length = 0;
+      return { progress: 0, valid: false, reason: 'Make larger circles' };
     }
-  } else {
-    rightPrevAngle = null;
-  }
-  rightPrevWrist = { x: rightWrist.x, y: rightWrist.y };
 
-  // Visual Cue: Draw Circle Progress Arcs around wrists
-  const drawArc = (wrist, accumulatedAngle) => {
+    const shoulderY = isRight ? rightShoulder.y : leftShoulder.y;
+    if (minY > shoulderY) {
+      return { progress: seq.length / 4, valid: false, reason: 'Reach above the target line!' };
+    }
+
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    const current = history[history.length - 1];
+    
+    const dx = current.x - cx;
+    const dy = current.y - cy;
+    let quad = 0; // 0:Top, 1:Right, 2:Bottom, 3:Left
+    if (Math.abs(dx) > Math.abs(dy)) {
+      quad = dx > 0 ? 1 : 3;
+    } else {
+      quad = dy > 0 ? 2 : 0;
+    }
+
+    let complete = false;
+    if (seq.length === 0) {
+      seq.push(quad);
+    } else {
+      const lastQuad = seq[seq.length - 1];
+      if (quad !== lastQuad) {
+        const diff = (quad - lastQuad + 4) % 4;
+        if (diff === 1 || diff === 3) {
+          if (seq.length === 4 && quad === seq[0]) {
+             complete = true;
+             seq.length = 0;
+             seq.push(quad);
+          } else if (seq.includes(quad)) {
+             seq.length = 0;
+             seq.push(quad);
+          } else {
+             seq.push(quad);
+          }
+        } else {
+           seq.length = 0;
+           seq.push(quad);
+        }
+      }
+    }
+    return { progress: seq.length / 4, valid: true, complete: complete, reason: 'Circling...' };
+  };
+
+  const leftState = processCircle(leftWristHistory, leftQuadrantSeq, false);
+  const rightState = processCircle(rightWristHistory, rightQuadrantSeq, true);
+
+  const drawArc = (wrist, progress) => {
     ctx.save();
     const cx = wrist.x * canvas.width;
     const cy = wrist.y * canvas.height;
     const radius = 40;
-    const progress = Math.min(1, Math.abs(accumulatedAngle) / PI2);
     
-    // Draw background track
     ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, PI2);
+    ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
     ctx.lineWidth = 6;
     ctx.stroke();
     
-    // Draw progress arc
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, -Math.PI/2, -Math.PI/2 + (progress * PI2), false);
-    ctx.strokeStyle = 'rgba(250, 157, 40, 0.9)'; // Accent color
-    ctx.lineWidth = 6;
-    ctx.lineCap = 'round';
-    ctx.stroke();
+    if (progress > 0) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, -Math.PI/2, -Math.PI/2 + (progress * 2 * Math.PI), false);
+      ctx.strokeStyle = 'rgba(250, 157, 40, 0.9)';
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
     ctx.restore();
   };
 
-  drawArc(leftWrist, leftAccumulatedAngle);
-  drawArc(rightWrist, rightAccumulatedAngle);
+  drawArc(leftWrist, leftState.progress);
+  drawArc(rightWrist, rightState.progress);
 
-  // Update Extension Meter
-  const extensionPercent = Math.min(100, (Math.min(leftDist, rightDist) / 0.4) * 100);
-  meterOneValue.textContent = `${Math.round(extensionPercent)}%`;
-  meterOneFill.style.width = `${extensionPercent}%`;
-  meterOneFill.className = (isLeftExtended && isRightExtended) ? 'meter-bar-fill meter-purple' : 'meter-bar-fill meter-blue';
+  meterOneValue.textContent = `${Math.round(leftState.progress * 100)}%`;
+  meterOneFill.style.width = `${leftState.progress * 100}%`;
+  meterOneFill.className = leftState.valid ? 'meter-bar-fill meter-purple' : 'meter-bar-fill meter-blue';
 
-  // Update Circle Progress
-  const avgCircleProgress = (Math.abs(leftAccumulatedAngle) + Math.abs(rightAccumulatedAngle)) / 2;
-  const progressPercent = Math.min(100, (avgCircleProgress / PI2) * 100);
-  meterTwoValue.textContent = `${Math.round(progressPercent)}%`;
-  meterTwoFill.style.width = `${progressPercent}%`;
+  meterTwoValue.textContent = `${Math.round(rightState.progress * 100)}%`;
+  meterTwoFill.style.width = `${rightState.progress * 100}%`;
+  meterTwoFill.className = rightState.valid ? 'meter-bar-fill meter-purple' : 'meter-bar-fill meter-blue';
 
-  distValue.textContent = leftDist.toFixed(2);
-  overheadValue.textContent = rightDist.toFixed(2);
+  distValue.textContent = leftQuadrantSeq.length;
+  overheadValue.textContent = rightQuadrantSeq.length;
 
-  if (!isLeftExtended || !isRightExtended) {
-    poseStatusBadge.className = 'status-badge status-tracking';
-    statusText.textContent = 'Extend your arms straight out to begin circles!';
-    targetBanner.classList.add('hidden');
-    return;
-  }
-
-  if (Math.abs(leftAccumulatedAngle) >= PI2 && Math.abs(rightAccumulatedAngle) >= PI2) {
-    // Both completed a circle
-    leftAccumulatedAngle -= Math.sign(leftAccumulatedAngle) * PI2;
-    rightAccumulatedAngle -= Math.sign(rightAccumulatedAngle) * PI2;
+  if (leftState.complete || rightState.complete) {
+    leftQuadrantSeq.length = 0;
+    rightQuadrantSeq.length = 0;
     
     const midPxX = ((leftWrist.x + rightWrist.x) / 2) * canvas.width;
     const midPxY = ((leftWrist.y + rightWrist.y) / 2) * canvas.height;
@@ -632,13 +675,10 @@ function trackArmCircles(landmarks) {
     targetBanner.classList.remove('hidden');
     targetBanner.innerHTML = '<span>🙌 FULL CIRCLE COMPLETED</span>';
   } else {
-    poseStatusBadge.className = 'status-badge status-tracking';
-    statusText.textContent = `Circling... ${Math.round(progressPercent)}% complete`;
+    poseStatusBadge.className = leftState.valid || rightState.valid ? 'status-badge status-tracking' : 'status-badge status-idle';
+    statusText.textContent = (!leftState.valid && !rightState.valid) ? leftState.reason : 'Circling...';
     targetBanner.classList.add('hidden');
   }
-
-  // Draw any active burst particles
-  updateAndDrawParticles();
 }
 
 function updateUIForNoPose() {
@@ -842,12 +882,14 @@ resetScoreBtn.addEventListener('click', () => {
   score = 0;
   scoreValue.textContent = '0';
   overlayScoreValue.textContent = '0';
+  if (rewardsScoreValue) rewardsScoreValue.textContent = '0';
   xp = 0;
   level = 1;
   isHandsClappedAboveHead = false;
   
-  if (timerValue.textContent === "TIME'S UP!") {
-    timeLeft = parseInt(timerLengthSelect.value, 10) || 60;
+  if (overlayTimerValue.textContent === "TIME'S UP!") {
+    const activePill = document.querySelector('.pill-btn.active');
+    timeLeft = activePill ? parseInt(activePill.dataset.value, 10) : 60;
     updateTimerDisplay();
   }
   
@@ -860,25 +902,28 @@ resetScoreBtn.addEventListener('click', () => {
   }, 300);
 });
 
-dashboardToggleBtn.addEventListener('click', () => {
-  dashboardDrawer.classList.toggle('open');
-});
-
-constellationBtn.addEventListener('click', (e) => {
-  // Prevent click from propagating to document
-  e.stopPropagation();
-  constellationDropdown.classList.toggle('hidden');
-});
-
-// Close dropdown and drawer when clicking outside
-document.addEventListener('click', (e) => {
-  if (!constellationBtn.contains(e.target)) {
-    constellationDropdown.classList.add('hidden');
-  }
-  
-  if (!dashboardToggleBtn.contains(e.target) && !dashboardDrawer.contains(e.target)) {
-    dashboardDrawer.classList.remove('open');
-  }
+// Tab Switching Logic
+sidebarTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    // Remove active class from all tabs
+    sidebarTabs.forEach(t => t.classList.remove('active', 'aria-selected'));
+    tab.setAttribute('aria-selected', 'true');
+    tab.classList.add('active');
+    
+    // Hide all panels
+    tabPanels.forEach(panel => {
+      panel.classList.remove('active');
+      panel.classList.add('hidden');
+    });
+    
+    // Show target panel
+    const targetId = tab.dataset.target;
+    const targetPanel = document.getElementById(targetId);
+    if (targetPanel) {
+      targetPanel.classList.remove('hidden');
+      targetPanel.classList.add('active');
+    }
+  });
 });
 
 function startTimer() {
@@ -888,12 +933,17 @@ function startTimer() {
   score = 0;
   scoreValue.textContent = '0';
   overlayScoreValue.textContent = '0';
+  if (rewardsScoreValue) rewardsScoreValue.textContent = '0';
   isHandsClappedAboveHead = false;
   
-  timeLeft = parseInt(timerLengthSelect.value, 10) || 60;
+  // Get time from active pill
+  const activePill = document.querySelector('.pill-btn.active');
+  timeLeft = activePill ? parseInt(activePill.dataset.value, 10) : 60;
+  
   isTimerActive = true;
   timerBtnText.textContent = 'Stop';
-  timerDisplay.classList.remove('danger');
+  overlayTimer.classList.remove('hidden');
+  overlayTimer.classList.remove('danger');
   keyboardHintOverlay.classList.add('hidden');
   updateTimerDisplay();
   
@@ -902,12 +952,12 @@ function startTimer() {
     updateTimerDisplay();
     
     if (timeLeft <= 10) {
-      timerDisplay.classList.add('danger');
+      overlayTimer.classList.add('danger');
     }
     
     if (timeLeft <= 0) {
       stopTimer();
-      timerValue.textContent = "TIME'S UP!";
+      overlayTimerValue.textContent = "TIME'S UP!";
     }
   }, 1000);
 }
@@ -916,7 +966,8 @@ function stopTimer() {
   isTimerActive = false;
   clearInterval(timerInterval);
   timerBtnText.textContent = 'Start';
-  timerDisplay.classList.remove('danger');
+  overlayTimer.classList.add('hidden');
+  overlayTimer.classList.remove('danger');
   if (isCameraActive) {
     keyboardHintText.innerHTML = 'Press <kbd>Space</kbd> to Start Timer';
     keyboardHintOverlay.classList.remove('hidden');
@@ -926,13 +977,14 @@ function stopTimer() {
 function updateTimerDisplay() {
   const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
   const s = (timeLeft % 60).toString().padStart(2, '0');
-  timerValue.textContent = `${m}:${s}`;
+  overlayTimerValue.textContent = `${m}:${s}`;
 }
 
 timerBtn.addEventListener('click', () => {
   if (isTimerActive) {
     stopTimer();
-    timeLeft = parseInt(timerLengthSelect.value, 10) || 60;
+    const activePill = document.querySelector('.pill-btn.active');
+    timeLeft = activePill ? parseInt(activePill.dataset.value, 10) : 60;
     updateTimerDisplay();
   } else {
     startTimer();
@@ -945,46 +997,53 @@ soundToggleBtn.addEventListener('click', () => {
   soundToggleBtn.title = soundEnabled ? 'Audio Enabled' : 'Audio Muted';
 });
 
-timerLengthSelect.addEventListener('change', () => {
-  if (!isTimerActive) {
-    timeLeft = parseInt(timerLengthSelect.value, 10) || 60;
+pillBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (isTimerActive) return; // Prevent changing time while running
+    
+    pillBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    timeLeft = parseInt(btn.dataset.value, 10) || 60;
     updateTimerDisplay();
-  }
+  });
 });
 
-exerciseSelect.addEventListener('change', () => {
-  currentExercise = exerciseSelect.value;
-  
-  if (currentExercise === 'claps') {
-    meterOneLabel.textContent = 'Wrist Proximity (Clap)';
-    meterOneSubtext.textContent = 'Clap when distance < 0.15';
-    meterTwoLabel.textContent = 'Elevation (Y-Axis)';
-    meterTwoSubtext.textContent = 'Both wrists must rise above nose (Y < Nose Y)';
-    scoreHint.textContent = 'Clap both hands high above your head to score +1';
+segmentBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    segmentBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentExercise = btn.dataset.value;
     
-    instructionsClaps.classList.remove('hidden');
-    instructionsCircles.classList.add('hidden');
-  } else if (currentExercise === 'circles') {
-    meterOneLabel.textContent = 'Arm Extension';
-    meterOneSubtext.textContent = 'Keep both arms fully extended straight out';
-    meterTwoLabel.textContent = 'Circle Progress';
-    meterTwoSubtext.textContent = 'Complete a full 360° rotation';
-    scoreHint.textContent = 'Extend your arms and make full circles to score +1';
+    if (currentExercise === 'claps') {
+      meterOneLabel.textContent = 'Wrist Proximity (Jumping Jack)';
+      meterOneSubtext.textContent = 'Hands together when distance < 0.15';
+      meterTwoLabel.textContent = 'Elevation (Y-Axis)';
+      meterTwoSubtext.textContent = 'Both wrists must rise above nose (Y < Nose Y)';
+      scoreHint.textContent = 'Perform a half jumping jack to score +1';
+      quickInstructionText.textContent = 'Start with hands at your sides, then bring both hands together high above your head to score.';
+      
+      instructionsClaps.classList.remove('hidden');
+      instructionsCircles.classList.add('hidden');
+    } else if (currentExercise === 'circles') {
+      meterOneLabel.textContent = 'Arm Extension';
+      meterOneSubtext.textContent = 'Keep both arms fully extended straight out';
+      meterTwoLabel.textContent = 'Circle Progress';
+      meterTwoSubtext.textContent = 'Complete a full 360° rotation';
+      scoreHint.textContent = 'Extend your arms and make full circles to score +1';
+      quickInstructionText.textContent = 'Extend arms straight out. Draw large circles in the air, ensuring your hands reach above the glowing target line.';
+      
+      instructionsClaps.classList.add('hidden');
+      instructionsCircles.classList.remove('hidden');
+    }
     
-    instructionsClaps.classList.add('hidden');
-    instructionsCircles.classList.remove('hidden');
-  }
-  
-  // Reset tracking states
-  leftAccumulatedAngle = 0;
-  rightAccumulatedAngle = 0;
-  leftPrevAngle = null;
-  rightPrevAngle = null;
-  leftPrevWrist = null;
-  rightPrevWrist = null;
-  isHandsClappedAboveHead = false;
+    // Reset tracking states
+    leftWristHistory.length = 0;
+    rightWristHistory.length = 0;
+    leftQuadrantSeq.length = 0;
+    rightQuadrantSeq.length = 0;
+    isHandsClappedAboveHead = false;
+  });
 });
-
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
   // Prevent spacebar from scrolling the page
@@ -993,7 +1052,8 @@ document.addEventListener('keydown', (e) => {
     if (isCameraActive) {
       if (isTimerActive) {
         stopTimer();
-        timeLeft = parseInt(timerLengthSelect.value, 10) || 60;
+        const activePill = document.querySelector('.pill-btn.active');
+        timeLeft = activePill ? parseInt(activePill.dataset.value, 10) : 60;
         updateTimerDisplay();
       } else {
         startTimer();
@@ -1012,6 +1072,7 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('DOMContentLoaded', () => {
   initPoseDetector();
   updateProgressionUI();
-  timeLeft = parseInt(timerLengthSelect.value, 10) || 60;
+  const activePill = document.querySelector('.pill-btn.active');
+  timeLeft = activePill ? parseInt(activePill.dataset.value, 10) : 60;
   updateTimerDisplay();
 });
