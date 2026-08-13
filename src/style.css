@@ -138,8 +138,8 @@ body {
 
 .camera-controls-bottom {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 1rem;
   align-items: center;
   justify-content: center;
   margin-top: 1rem;
@@ -147,6 +147,15 @@ body {
   background: rgba(15, 23, 42, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
+}
+
+.controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 /* Segmented Controls & Pills */
@@ -252,14 +261,15 @@ body {
   display: flex; /* Always show overlay score */
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1024px) {
   .main-content {
     grid-template-columns: 1fr;
   }
-}
+  
+  .app-container {
+    padding: 1rem 0.5rem;
+  }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
   .app-header {
     flex-wrap: wrap;
     gap: 1rem;
@@ -278,28 +288,14 @@ body {
   .right-sidebar {
     width: 100%;
   }
-
-  /* Hide button text on mobile for compactness */
-  #timerBtnText, #dashboardText, #cameraBtnText {
-    display: none;
-  }
   
-  #soundToggleBtn {
-    font-size: 0; /* Hide 'Audio' text */
-  }
-  #soundToggleBtn span {
-    font-size: 1rem; /* Keep icon visible */
-  }
-  
-  #resetScoreBtn {
-    font-size: 0;
-  }
-  #resetScoreBtn span {
-    font-size: 1rem;
+  .controls-row > * {
+    flex: 1 1 auto;
+    min-width: calc(40% - 1rem);
   }
 
   .btn {
-    padding: 0.5rem 0.75rem;
+    padding: 0.75rem 1rem;
   }
 
   .overlay-score {
@@ -437,6 +433,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (max-width: 1024px) {
+  .media-container {
+    aspect-ratio: auto;
+    height: 45vh;
+  }
 }
 
 /* Mirrored Video & Canvas Overlay */
@@ -745,187 +748,186 @@ body {
   font-family: var(--font-heading);
   color: #00f2fe;
   font-size: 0.9rem;
-  letter-spacing: 1.5px;
-  margin-bottom: 0.75rem;
+  letter-spacing: 2px;
   text-transform: uppercase;
 }
 
-.milestone-list {
+/* Carousel UI */
+.carousel-wrapper {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  container-type: inline-size;
-  container-name: milestoneList;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
-/* Base Card Structure */
-.milestone-item {
+.carousel-nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0 0.5rem;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+.carousel-nav-btn:hover {
+  color: #fff;
+  transform: scale(1.2);
+}
+
+#nextRewardContent {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  padding: 0 1rem;
+}
+
+#nextRewardContent .sticker-slot {
+  width: 120px;
+  padding: 1rem 0.5rem;
+}
+
+#nextRewardContent .sticker-icon {
+  width: 90px;
+  height: 90px;
+}
+#nextRewardContent .sticker-icon svg {
+  width: 60px;
+  height: 60px;
+}
+
+.sticker-book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 0.75rem;
+  padding: 0.5rem;
+  justify-content: center;
+  justify-items: center;
+}
+
+.sticker-slot {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  width: 100%;
   background: rgba(15, 22, 38, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 1.25rem;
+  border-radius: 12px;
+  padding: 0.5rem 0.25rem;
   position: relative;
-  overflow: hidden;
   backdrop-filter: blur(8px);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
 }
 
-/* Container Query for Responsive Layout */
-@container milestoneList (min-width: 320px) {
-  .milestone-item {
-    flex-direction: row;
-    align-items: center;
-  }
+.sticker-slot:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.05);
 }
 
-.milestone-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: var(--card-accent, transparent);
-  border-radius: 4px 0 0 4px;
-}
-
-.milestone-icon {
-  width: 50px;
-  height: 50px;
+.sticker-icon {
+  width: 70px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 12px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.1);
-}
-.milestone-icon svg {
-  width: 24px;
-  height: 24px;
+  transition: all 0.3s ease;
 }
 
-.milestone-info {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  min-width: 0; /* Prevents flexbox overflow */
+.sticker-icon svg {
+  width: 48px;
+  height: 48px;
 }
 
-.milestone-info-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.milestone-info-header h5 {
+.sticker-name {
   font-family: var(--font-heading);
+  font-size: 0.65rem;
+  font-weight: 700;
   color: #fff;
-  font-size: clamp(0.9rem, 4cqw, 1.1rem);
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0.25rem;
+  transition: color 0.3s ease;
 }
 
-.milestone-progress-text {
+.sticker-progress {
   font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: 0.6rem;
   color: var(--text-muted);
 }
 
-.milestone-progress-track {
-  width: 100%;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-  margin: 0.25rem 0;
-  overflow: hidden;
+/* Locked State */
+.sticker-slot.locked {
+  opacity: 0.7;
 }
 
-.milestone-progress-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Achievement States */
-.milestone-item.locked {
-  opacity: 0.6;
-}
-.milestone-item.locked .milestone-icon {
+.sticker-slot.locked .sticker-icon {
   filter: grayscale(100%);
-  opacity: 0.5;
+  opacity: 0.7;
+  border: 1px dashed rgba(255, 255, 255, 0.3);
 }
 
-.milestone-item.in-progress {
+.sticker-slot.locked .sticker-name {
+  color: var(--text-muted);
+}
+
+/* In Progress State */
+.sticker-slot.in-progress {
   border-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.milestone-item.completed {
+/* Completed/Unlocked State */
+.sticker-slot.completed {
   background: rgba(var(--card-rgb), 0.1);
   border-color: var(--card-accent);
-  box-shadow: 0 0 20px rgba(var(--card-rgb), 0.2);
+  box-shadow: 0 0 15px rgba(var(--card-rgb), 0.3);
+  animation: unlockPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.milestone-item.completed .milestone-icon {
+
+.sticker-slot.completed .sticker-icon {
   background: rgba(var(--card-rgb), 0.2);
   border-color: var(--card-accent);
-  box-shadow: inset 0 0 10px rgba(var(--card-rgb), 0.5);
+  box-shadow: inset 0 0 10px rgba(var(--card-rgb), 0.5), 0 0 15px rgba(var(--card-rgb), 0.5);
 }
 
-/* State Badge */
-.milestone-status-badge {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  font-weight: 700;
-  padding: 0.2rem 0.5rem;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-}
-.milestone-item.completed .milestone-status-badge {
-  background: var(--card-accent);
-  color: #000;
+.sticker-slot.completed .sticker-name {
+  color: var(--card-accent);
+  text-shadow: 0 0 8px rgba(var(--card-rgb), 0.8);
 }
 
-.milestone-cluster {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-}
-
-.milestone-sticker {
-  width: 60px;
-  height: 60px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* SVG Animations for unlocking */
+/* SVG Animations for Unlocked Constellations */
 .sticker-svg circle {
   transition: fill 0.5s, filter 0.5s;
-  fill: rgba(255, 255, 255, 0.2);
+  fill: rgba(255, 255, 255, 0.4);
+}
+
+.sticker-svg circle.star-lit {
+  fill: var(--card-accent);
+  filter: drop-shadow(0 0 5px var(--card-accent));
 }
 
 .sticker-svg path {
-  stroke: rgba(255, 255, 255, 0.1);
+  stroke: rgba(255, 255, 255, 0.2);
   transition: stroke 0.5s;
 }
 
-.milestone-item.unlocked .sticker-svg circle {
-  filter: drop-shadow(0 0 5px currentColor);
+.sticker-slot.completed .sticker-svg path {
+  stroke: var(--card-accent);
+  opacity: 0.8;
 }
-.milestone-item.unlocked .sticker-svg path {
-  stroke: currentColor;
-  opacity: 0.5;
+
+@keyframes unlockPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(var(--card-rgb), 0.6); }
+  100% { transform: scale(1); box-shadow: 0 0 15px rgba(var(--card-rgb), 0.3); }
 }
 
 /* Score Card */

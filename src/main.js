@@ -14,36 +14,18 @@ const xpPerLevel = 1000;
 const xpPerClap = 200; // Fast progression for demo
 
 const milestonesData = [
-  { 
-    id: 'sprint',
-    target: 5, 
-    name: 'GALACTIC SPRINT', 
-    desc: 'CLAPS',
-    cluster: 'Sprint Cluster',
-    color: '#00f2fe',
-    iconSVG: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4h.01M4 12h4l1.5-3 2.5 3 2.5-3L18 12h2M12 20v-4M8 16l-3 4"/></svg>`,
-    constellationSVG: `<svg class="sticker-svg" viewBox="0 0 50 50" width="60" height="60" fill="none" stroke-width="1.5"><path d="M10,15 L25,25 L40,15 M25,25 L30,40 M15,35 L25,25"/><circle cx="10" cy="15" r="1.5"/><circle cx="25" cy="25" r="2"/><circle cx="40" cy="15" r="1.5"/><circle cx="30" cy="40" r="1.5"/><circle cx="15" cy="35" r="1.5"/></svg>`
-  },
-  { 
-    id: 'lift',
-    target: 20, 
-    name: 'STELLAR LIFT', 
-    desc: 'CLAPS',
-    cluster: 'Crux Nebula',
-    color: '#FA9D28',
-    iconSVG: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5v14M18 5v14M2 12h20M9 12v3M15 12v3"/></svg>`,
-    constellationSVG: `<svg class="sticker-svg" viewBox="0 0 50 50" width="60" height="60" fill="none" stroke-width="1.5"><path d="M10,20 L20,30 L35,25 L45,15"/><circle cx="10" cy="20" r="1.5"/><circle cx="20" cy="30" r="2"/><circle cx="35" cy="25" r="1.5"/><circle cx="45" cy="15" r="1.5"/></svg>`
-  },
-  { 
-    id: 'streak',
-    target: 30, 
-    name: 'COSMIC STREAK', 
-    desc: 'CLAPS',
-    cluster: 'Leo Minoris',
-    color: '#FA9D28',
-    iconSVG: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/><polyline points="12 7 12 14 15 16"/></svg>`,
-    constellationSVG: `<svg class="sticker-svg" viewBox="0 0 50 50" width="60" height="60" fill="none" stroke-width="1.5"><path d="M15,40 L35,40 L45,25 L35,15 L15,15"/><circle cx="15" cy="40" r="1.5"/><circle cx="35" cy="40" r="1.5"/><circle cx="45" cy="25" r="2"/><circle cx="35" cy="15" r="1.5"/><circle cx="15" cy="15" r="1.5"/></svg>`
-  }
+  { id: 'aries', target: 25, name: 'ARIES', color: '#FA9D28', iconSVG: '<svg class="sticker-svg" viewBox="0 0 50 50" width="100%" height="100%" fill="none" stroke-width="2"><path d="M15,20 Q20,10 25,20 T35,20 M10,25 L15,20 M40,25 L35,20 M25,20 L25,40"/><circle cx="10" cy="25" r="1.5"/><circle cx="15" cy="20" r="1.5"/><circle cx="25" cy="20" r="2"/><circle cx="35" cy="20" r="1.5"/><circle cx="40" cy="25" r="1.5"/><circle cx="25" cy="40" r="1.5"/></svg>' },
+  { id: 'taurus', target: 55, name: 'TAURUS', color: '#00f2fe', iconSVG: '<svg class="sticker-svg" viewBox="0 0 50 50" width="100%" height="100%" fill="none" stroke-width="2"><path d="M15,15 Q25,30 35,15 M25,22 L25,35 M15,35 L25,35 L35,35"/><circle cx="15" cy="15" r="1.5"/><circle cx="35" cy="15" r="1.5"/><circle cx="25" cy="22" r="2"/><circle cx="25" cy="35" r="1.5"/><circle cx="15" cy="35" r="1.5"/><circle cx="35" cy="35" r="1.5"/></svg>' },
+  { id: 'gemini', target: 95, name: 'GEMINI', color: '#FA9D28', iconSVG: '<svg class="sticker-svg" viewBox="0 0 50 50" width="100%" height="100%" fill="none" stroke-width="2"><path d="M15,15 L35,15 M15,35 L35,35 M20,15 L20,35 M30,15 L30,35"/><circle cx="15" cy="15" r="1.5"/><circle cx="35" cy="15" r="1.5"/><circle cx="15" cy="35" r="1.5"/><circle cx="35" cy="35" r="1.5"/><circle cx="20" cy="15" r="1.5"/><circle cx="20" cy="35" r="1.5"/><circle cx="30" cy="15" r="1.5"/><circle cx="30" cy="35" r="1.5"/></svg>' },
+  { id: 'cancer', target: 135, name: 'CANCER', color: '#00f2fe', iconSVG: '<svg class="sticker-svg" viewBox="0 0 50 50" width="100%" height="100%" fill="none" stroke-width="2"><path d="M15,20 Q25,10 35,20 M15,30 Q25,40 35,30 M20,25 L30,25"/><circle cx="15" cy="20" r="1.5"/><circle cx="35" cy="20" r="1.5"/><circle cx="15" cy="30" r="1.5"/><circle cx="35" cy="30" r="1.5"/><circle cx="20" cy="25" r="1.5"/><circle cx="30" cy="25" r="1.5"/></svg>' },
+  { id: 'leo', target: 170, name: 'LEO', color: '#FA9D28', iconSVG: '<svg class="sticker-svg" viewBox="0 0 50 50" width="100%" height="100%" fill="none" stroke-width="2"><path d="M15,25 Q20,15 30,15 Q40,25 30,35 Q20,25 15,25 M30,15 L35,20"/><circle cx="15" cy="25" r="2"/><circle cx="30" cy="15" r="1.5"/><circle cx="30" cy="35" r="1.5"/><circle cx="40" cy="25" r="1.5"/><circle cx="35" cy="20" r="1.5"/></svg>' },
+  { id: 'virgo', target: 205, name: 'VIRGO', color: '#00f2fe', iconSVG: '<svg class="sticker-svg" viewBox="0 0 50 50" width="100%" height="100%" fill="none" stroke-width="2"><path d="M15,20 L20,35 L25,20 L30,35 M30,35 Q35,15 40,25"/><circle cx="15" cy="20" r="1.5"/><circle cx="20" cy="35" r="1.5"/><circle cx="25" cy="20" r="1.5"/><circle cx="30" cy="35" r="2"/><circle cx="40" cy="25" r="1.5"/></svg>' },
+  { id: 'libra', target: 255, name: 'LIBRA', color: '#FA9D28', iconSVG: '<svg class="sticker-svg" viewBox="0 0 50 50" width="100%" height="100%" fill="none" stroke-width="2"><path d="M10,25 L40,25 M15,20 Q25,10 35,20 L40,25 M25,14 L25,35 M15,35 L35,35"/><circle cx="10" cy="25" r="1.5"/><circle cx="40" cy="25" r="1.5"/><circle cx="15" cy="20" r="1.5"/><circle cx="35" cy="20" r="1.5"/><circle cx="25" cy="14" r="2"/><circle cx="25" cy="35" r="1.5"/><circle cx="15" cy="35" r="1.5"/><circle cx="35" cy="35" r="1.5"/></svg>' },
+  { id: 'scorpius', target: 305, name: 'SCORPIUS', color: '#00f2fe', iconSVG: '<svg class="sticker-svg" viewBox="0 0 50 50" width="100%" height="100%" fill="none" stroke-width="2"><path d="M10,15 L20,15 Q30,15 30,25 Q30,35 20,35 L15,30 M30,25 L40,30 L40,20"/><circle cx="10" cy="15" r="1.5"/><circle cx="20" cy="15" r="1.5"/><circle cx="30" cy="25" r="2"/><circle cx="20" cy="35" r="1.5"/><circle cx="15" cy="30" r="1.5"/><circle cx="40" cy="30" r="1.5"/><circle cx="40" cy="20" r="1.5"/></svg>' },
+  { id: 'sagittarius', target: 350, name: 'SAGITTARIUS', color: '#FA9D28', iconSVG: '<svg class="sticker-svg" viewBox="0 0 50 50" width="100%" height="100%" fill="none" stroke-width="2"><path d="M15,35 L35,15 M25,15 L35,15 L35,25 M20,30 L30,20"/><circle cx="15" cy="35" r="1.5"/><circle cx="35" cy="15" r="2"/><circle cx="25" cy="15" r="1.5"/><circle cx="35" cy="25" r="1.5"/><circle cx="20" cy="30" r="1.5"/><circle cx="30" cy="20" r="1.5"/></svg>' },
+  { id: 'capricornus', target: 390, name: 'CAPRICORNUS', color: '#00f2fe', iconSVG: '<svg class="sticker-svg" viewBox="0 0 50 50" width="100%" height="100%" fill="none" stroke-width="2"><path d="M15,15 L25,35 L35,15 Q40,25 35,35"/><circle cx="15" cy="15" r="1.5"/><circle cx="25" cy="35" r="2"/><circle cx="35" cy="15" r="1.5"/><circle cx="35" cy="35" r="1.5"/></svg>' },
+  { id: 'aquarius', target: 460, name: 'AQUARIUS', color: '#FA9D28', iconSVG: '<svg class="sticker-svg" viewBox="0 0 50 50" width="100%" height="100%" fill="none" stroke-width="2"><path d="M10,20 L15,15 L25,25 L35,15 L40,20 M10,30 L15,25 L25,35 L35,25 L40,30"/><circle cx="10" cy="20" r="1.5"/><circle cx="15" cy="15" r="1.5"/><circle cx="25" cy="25" r="1.5"/><circle cx="35" cy="15" r="1.5"/><circle cx="40" cy="20" r="1.5"/><circle cx="10" cy="30" r="1.5"/><circle cx="15" cy="25" r="1.5"/><circle cx="25" cy="35" r="2"/><circle cx="35" cy="25" r="1.5"/><circle cx="40" cy="30" r="1.5"/></svg>' },
+  { id: 'pisces', target: 500, name: 'PISCES', color: '#00f2fe', iconSVG: '<svg class="sticker-svg" viewBox="0 0 50 50" width="100%" height="100%" fill="none" stroke-width="2"><path d="M15,15 L35,35 M15,35 L35,15 M15,15 Q10,25 15,35 M35,15 Q40,25 35,35"/><circle cx="15" cy="15" r="1.5"/><circle cx="35" cy="35" r="1.5"/><circle cx="15" cy="35" r="1.5"/><circle cx="35" cy="15" r="1.5"/><circle cx="25" cy="25" r="2"/></svg>' }
 ];
 
 function updateProgressionUI() {
@@ -62,66 +44,84 @@ function updateProgressionUI() {
     progressPath.style.strokeDashoffset = dashOffset;
   }
 
-  if(milestoneList) {
-    milestoneList.innerHTML = '';
-    let nextRewardFound = false;
-    
-    milestonesData.forEach(m => {
+  if (milestoneList) {
+    const isFirstRender = milestoneList.children.length === 0;
+
+    milestonesData.forEach((m, index) => {
+      const prevTarget = index === 0 ? 0 : milestonesData[index-1].target;
+      const targetDifference = m.target - prevTarget;
+      
       const isCompleted = score >= m.target;
-      const progressValue = Math.min(score, m.target);
-      const progressPercent = (progressValue / m.target) * 100;
+      const pointsInThisConstellation = Math.max(0, Math.min(score - prevTarget, targetDifference));
+      
+      // Determine how many stars there are (circles)
+      const starCount = (m.iconSVG.match(/<circle/g) || []).length;
+      
+      let starsLit = 0;
+      if (isCompleted) {
+        starsLit = starCount;
+      } else if (pointsInThisConstellation > 0) {
+        const percentComplete = pointsInThisConstellation / targetDifference;
+        starsLit = Math.floor(percentComplete * starCount);
+      }
       
       let stateClass = 'locked';
-      let stateText = 'Locked';
       if (isCompleted) {
         stateClass = 'completed';
-        stateText = 'Claimed';
-      } else if (progressValue > 0) {
+      } else if (pointsInThisConstellation > 0) {
         stateClass = 'in-progress';
-        stateText = 'In Progress';
       }
 
-      // Convert hex to rgb for css variable
-      const hex = m.color.replace('#', '');
-      const r = parseInt(hex.substring(0, 2), 16);
-      const g = parseInt(hex.substring(2, 4), 16);
-      const b = parseInt(hex.substring(4, 6), 16);
-      
-      const item = document.createElement('div');
-      item.className = `milestone-item ${stateClass}`;
-      item.style.setProperty('--card-accent', m.color);
-      item.style.setProperty('--card-rgb', `${r}, ${g}, ${b}`);
-      
-      item.innerHTML = `
-        <div class="milestone-icon">
-          ${m.iconSVG}
-        </div>
-        <div class="milestone-info">
-          <div class="milestone-info-header">
-            <h5>${m.name}</h5>
-            <span class="milestone-status-badge">${stateText}</span>
+      let item;
+      if (isFirstRender) {
+        // Convert hex to rgb for css variable
+        const hex = m.color.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        
+        item = document.createElement('div');
+        item.style.setProperty('--card-accent', m.color);
+        item.style.setProperty('--card-rgb', `${r}, ${g}, ${b}`);
+        item.title = `${m.name} (Requires ${m.target} Score)`;
+        
+        item.innerHTML = `
+          <div class="sticker-icon">
+            ${m.iconSVG}
           </div>
-          <div class="milestone-progress-track">
-            <div class="milestone-progress-fill" style="width: ${progressPercent}%; background: ${m.color}; box-shadow: 0 0 8px ${m.color};"></div>
+          <div class="sticker-name">${m.name}</div>
+          <div class="sticker-progress">
+            <span class="p-val">${starsLit}</span> / <span class="p-target">${starCount}</span>
           </div>
-          <div class="milestone-info-header" style="margin-top: -0.1rem;">
-            <span class="milestone-progress-text">${m.cluster}</span>
-            <span class="milestone-progress-text">${progressValue}/${m.target}</span>
-          </div>
-        </div>
-      `;
-      milestoneList.appendChild(item);
-
-      if (!isCompleted && !nextRewardFound && nextRewardContent) {
-        nextRewardContent.innerHTML = '';
-        nextRewardContent.appendChild(item.cloneNode(true));
-        nextRewardFound = true;
+        `;
+        milestoneList.appendChild(item);
+      } else {
+        item = milestoneList.children[index];
       }
+      
+      item.querySelector('.p-val').textContent = starsLit;
+      item.querySelector('.p-target').textContent = starCount;
+      
+      // Light up the specific stars
+      const circles = item.querySelectorAll('circle');
+      circles.forEach((c, idx) => {
+        if (idx < starsLit) {
+          c.classList.add('star-lit');
+        } else {
+          c.classList.remove('star-lit');
+        }
+      });
+      
+      item.className = `sticker-slot ${stateClass}`;
     });
 
-    if (!nextRewardFound && nextRewardContent) {
-      nextRewardContent.innerHTML = '<div style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 1rem 0;">All achievements unlocked!</div>';
+    // After updating grid, update the carousel
+    if (carouselIndex === -1) {
+      // Find the first uncompleted milestone to set as initial index
+      carouselIndex = milestonesData.findIndex(m => score < m.target);
+      if (carouselIndex === -1) carouselIndex = 0;
     }
+    updateCarouselUI();
   }
 }
 let isHandsClappedAboveHead = false;
@@ -156,7 +156,7 @@ const resetScoreBtn = document.getElementById('resetScoreBtn');
 const cameraToggleBtn = document.getElementById('cameraToggleBtn');
 const cameraBtnText = document.getElementById('cameraBtnText');
 const soundToggleBtn = document.getElementById('soundToggleBtn');
-const soundIcon = document.getElementById('soundIcon');
+const soundBtnText = document.getElementById('soundBtnText');
 
 const timerBtn = document.getElementById('timerBtn');
 const timerBtnText = document.getElementById('timerBtnText');
@@ -177,8 +177,6 @@ const keyboardHintText = document.getElementById('keyboardHintText');
 const sidebarTabs = document.querySelectorAll('.sidebar-tab');
 const tabPanels = document.querySelectorAll('.tab-panel');
 
-const overlayScore = document.getElementById('overlayScore');
-const overlayScoreValue = document.getElementById('overlayScoreValue');
 const rewardsScoreValue = document.getElementById('rewardsScoreValue');
 const appContainer = document.getElementById('app');
 
@@ -186,6 +184,38 @@ const poseStatusBadge = document.getElementById('poseStatusBadge');
 const statusText = document.getElementById('statusText');
 const targetBanner = document.getElementById('targetBanner');
 const loadingOverlay = document.getElementById('loadingOverlay');
+
+const carouselPrevBtn = document.getElementById('carouselPrevBtn');
+const carouselNextBtn = document.getElementById('carouselNextBtn');
+let carouselIndex = -1; // -1 means auto-track next reward
+
+function updateCarouselUI() {
+  const nextRewardContent = document.getElementById('nextRewardContent');
+  const milestoneList = document.getElementById('milestoneList');
+  if (!nextRewardContent || !milestoneList || milestoneList.children.length === 0) return;
+  
+  if (carouselIndex < 0) carouselIndex = milestonesData.length - 1;
+  if (carouselIndex >= milestonesData.length) carouselIndex = 0;
+  
+  const item = milestoneList.children[carouselIndex];
+  nextRewardContent.innerHTML = '';
+  if (item) {
+    nextRewardContent.appendChild(item.cloneNode(true));
+  }
+}
+
+if (carouselPrevBtn) {
+  carouselPrevBtn.addEventListener('click', () => {
+    carouselIndex--;
+    updateCarouselUI();
+  });
+}
+if (carouselNextBtn) {
+  carouselNextBtn.addEventListener('click', () => {
+    carouselIndex++;
+    updateCarouselUI();
+  });
+}
 const loadingText = document.getElementById('loadingText');
 
 const fpsValue = document.getElementById('fpsValue');
@@ -310,7 +340,6 @@ function incrementScore(particleX, particleY) {
 
   score += 1;
   scoreValue.textContent = score;
-  overlayScoreValue.textContent = score;
   if (rewardsScoreValue) rewardsScoreValue.textContent = score;
   
   // Progression
@@ -323,11 +352,10 @@ function incrementScore(particleX, particleY) {
   
   // UI Animations
   scoreCard.classList.add('bounce', 'scored');
-  overlayScore.classList.add('bounce');
+  
   setTimeout(() => {
     scoreCard.classList.remove('bounce', 'scored');
-    overlayScore.classList.remove('bounce');
-  }, 400);
+  }, 300);
 
   // Audio & Visual Effects
   playScoreChime();
@@ -881,7 +909,6 @@ cameraToggleBtn.addEventListener('click', () => {
 resetScoreBtn.addEventListener('click', () => {
   score = 0;
   scoreValue.textContent = '0';
-  overlayScoreValue.textContent = '0';
   if (rewardsScoreValue) rewardsScoreValue.textContent = '0';
   xp = 0;
   level = 1;
@@ -895,10 +922,9 @@ resetScoreBtn.addEventListener('click', () => {
   
   updateProgressionUI();
   scoreCard.classList.add('bounce');
-  overlayScore.classList.add('bounce');
+  
   setTimeout(() => {
     scoreCard.classList.remove('bounce');
-    overlayScore.classList.remove('bounce');
   }, 300);
 });
 
@@ -932,7 +958,6 @@ function startTimer() {
   // Reset score for the challenge
   score = 0;
   scoreValue.textContent = '0';
-  overlayScoreValue.textContent = '0';
   if (rewardsScoreValue) rewardsScoreValue.textContent = '0';
   isHandsClappedAboveHead = false;
   
@@ -993,7 +1018,7 @@ timerBtn.addEventListener('click', () => {
 
 soundToggleBtn.addEventListener('click', () => {
   soundEnabled = !soundEnabled;
-  soundIcon.textContent = soundEnabled ? '🔊' : '🔇';
+  soundBtnText.textContent = soundEnabled ? 'Audio On' : 'Audio Off';
   soundToggleBtn.title = soundEnabled ? 'Audio Enabled' : 'Audio Muted';
 });
 

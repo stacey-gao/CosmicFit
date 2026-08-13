@@ -69,12 +69,6 @@
           <div class="media-container" id="mediaContainer">
             <video id="webcam" playsinline muted></video>
             <canvas id="skeletonCanvas"></canvas>
-
-            <!-- Overlay Score (Focus Mode Only) -->
-            <div id="overlayScore" class="overlay-score">
-              <span id="overlayScoreValue">0</span>
-            </div>
-
             <!-- Overlay Timer (Only when active) -->
             <div id="overlayTimer" class="overlay-timer hidden">
               <span id="overlayTimerValue">01:00</span>
@@ -122,30 +116,36 @@
           <!-- Action Buttons Below Camera -->
           <div class="camera-controls-bottom">
             
-            <div class="segmented-control" id="exerciseSelect">
-              <button class="segment-btn active" data-value="claps">Half Jumping Jacks</button>
-              <button class="segment-btn" data-value="circles">Arm Circles</button>
+            <div class="controls-row">
+              <div class="segmented-control" id="exerciseSelect">
+                <button class="segment-btn active" data-value="claps">Half Jumping Jacks</button>
+                <button class="segment-btn" data-value="circles">Arm Circles</button>
+              </div>
+
+              <div class="pill-group" id="timerLengthSelect">
+                <button class="pill-btn" data-value="30">30s</button>
+                <button class="pill-btn active" data-value="60">1m</button>
+                <button class="pill-btn" data-value="120">2m</button>
+                <button class="pill-btn" data-value="300">5m</button>
+              </div>
             </div>
 
-            <div class="pill-group" id="timerLengthSelect">
-              <button class="pill-btn" data-value="30">30s</button>
-              <button class="pill-btn active" data-value="60">1m</button>
-              <button class="pill-btn" data-value="120">2m</button>
-              <button class="pill-btn" data-value="300">5m</button>
-            </div>
-            <button id="timerBtn" class="btn btn-secondary icon-btn" title="1 Min Challenge">
-              <span>⏱️</span> <span id="timerBtnText">Start</span>
-            </button>
+            <div class="controls-row">
+              <button id="timerBtn" class="btn btn-secondary" title="1 Min Challenge">
+                <span id="timerBtnText">Start</span>
+              </button>
 
-            <button id="soundToggleBtn" class="btn btn-secondary icon-btn" title="Toggle Sound">
-              <span id="soundIcon">🔊</span> Audio
-            </button>
-            <button id="resetScoreBtn" class="btn btn-secondary" title="Reset Score">
-              <span>🔄</span> Reset
-            </button>
-            <button id="cameraToggleBtn" class="btn btn-primary" title="Start/Stop Camera">
-              <span class="btn-icon">📷</span> <span id="cameraBtnText">Start Camera</span>
-            </button>
+              <button id="soundToggleBtn" class="btn btn-secondary" title="Toggle Sound">
+                <span id="soundBtnText">Audio On</span>
+              </button>
+              <button id="resetScoreBtn" class="btn btn-secondary" title="Reset Score">
+                Reset
+              </button>
+              <button id="cameraToggleBtn" class="btn btn-primary" title="Start/Stop Camera">
+                <span id="cameraBtnText">Start Camera</span>
+              </button>
+            </div>
+            
           </div>
         </div>
       </section>
@@ -156,7 +156,7 @@
         <!-- Tab List -->
         <div class="sidebar-tablist" role="tablist">
           <button class="sidebar-tab active" role="tab" aria-selected="true" data-target="instructionsTab">Instructions</button>
-          <button class="sidebar-tab" role="tab" aria-selected="false" data-target="rewardsTab">Rewards</button>
+          <button class="sidebar-tab" role="tab" aria-selected="false" data-target="rewardsTab">Albums</button>
         </div>
 
         <!-- Tab 1: Instructions (Score + Telemetry + How to Play) -->
@@ -203,11 +203,15 @@
             </div>
           </div>
           
-          <!-- Next Upcoming Reward (Dynamic) -->
+          <!-- Upcoming Rewards Carousel -->
           <div id="nextRewardContainer" class="telemetry-card">
-            <h3>Next Reward</h3>
-            <div id="nextRewardContent">
-              <!-- Populated by JS -->
+            <h3>Albums</h3>
+            <div class="carousel-wrapper">
+              <button id="carouselPrevBtn" class="carousel-nav-btn">❮</button>
+              <div id="nextRewardContent">
+                <!-- Populated by JS -->
+              </div>
+              <button id="carouselNextBtn" class="carousel-nav-btn">❯</button>
             </div>
           </div>
 
