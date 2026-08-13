@@ -7,7 +7,104 @@ import { Pose } from '@mediapipe/pose';
 
 // Global State
 let score = 0;
+
+let level = 1;
+let xp = 0;
+const xpPerLevel = 1000;
+const xpPerClap = 200; // Fast progression for demo
+
+const milestonesData = [
+  { 
+    id: 'sprint',
+    target: 5, 
+    name: 'GALACTIC SPRINT', 
+    desc: 'CLAPS',
+    cluster: 'Sprint Cluster',
+    color: '#00f2fe',
+    iconSVG: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4h.01M4 12h4l1.5-3 2.5 3 2.5-3L18 12h2M12 20v-4M8 16l-3 4"/></svg>`,
+    constellationSVG: `<svg class="sticker-svg" viewBox="0 0 50 50" width="60" height="60" fill="none" stroke-width="1.5"><path d="M10,15 L25,25 L40,15 M25,25 L30,40 M15,35 L25,25"/><circle cx="10" cy="15" r="1.5"/><circle cx="25" cy="25" r="2"/><circle cx="40" cy="15" r="1.5"/><circle cx="30" cy="40" r="1.5"/><circle cx="15" cy="35" r="1.5"/></svg>`
+  },
+  { 
+    id: 'lift',
+    target: 20, 
+    name: 'STELLAR LIFT', 
+    desc: 'CLAPS',
+    cluster: 'Crux Nebula',
+    color: '#FA9D28',
+    iconSVG: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5v14M18 5v14M2 12h20M9 12v3M15 12v3"/></svg>`,
+    constellationSVG: `<svg class="sticker-svg" viewBox="0 0 50 50" width="60" height="60" fill="none" stroke-width="1.5"><path d="M10,20 L20,30 L35,25 L45,15"/><circle cx="10" cy="20" r="1.5"/><circle cx="20" cy="30" r="2"/><circle cx="35" cy="25" r="1.5"/><circle cx="45" cy="15" r="1.5"/></svg>`
+  },
+  { 
+    id: 'streak',
+    target: 30, 
+    name: 'COSMIC STREAK', 
+    desc: 'CLAPS',
+    cluster: 'Leo Minoris',
+    color: '#FA9D28',
+    iconSVG: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/><polyline points="12 7 12 14 15 16"/></svg>`,
+    constellationSVG: `<svg class="sticker-svg" viewBox="0 0 50 50" width="60" height="60" fill="none" stroke-width="1.5"><path d="M15,40 L35,40 L45,25 L35,15 L15,15"/><circle cx="15" cy="40" r="1.5"/><circle cx="35" cy="40" r="1.5"/><circle cx="45" cy="25" r="2"/><circle cx="35" cy="15" r="1.5"/><circle cx="15" cy="15" r="1.5"/></svg>`
+  }
+];
+
+function updateProgressionUI() {
+  const levelText = document.getElementById('levelText');
+  const xpText = document.getElementById('xpText');
+  const progressPath = document.getElementById('progressPath');
+  const milestoneList = document.getElementById('milestoneList');
+  
+  if(levelText) levelText.textContent = `Level ${level}`;
+  if(xpText) xpText.textContent = `${xp}/${xpPerLevel} XP`;
+  
+  if(progressPath) {
+    const progressPercent = Math.min(xp / xpPerLevel, 1);
+    const dashOffset = 400 - (progressPercent * 400);
+    progressPath.style.strokeDashoffset = dashOffset;
+  }
+
+  if(milestoneList) {
+    milestoneList.innerHTML = '';
+    
+    milestonesData.forEach(m => {
+      const isUnlocked = score >= m.target;
+      const progressValue = Math.min(score, m.target);
+      const progressPercent = (progressValue / m.target) * 100;
+      
+      const item = document.createElement('div');
+      item.className = `milestone-item ${isUnlocked ? 'unlocked' : ''}`;
+      // Use style override for the category color
+      item.style.setProperty('--primary', m.color);
+      item.innerHTML = `
+        <div class="milestone-icon" style="color: ${m.color}; border-color: ${m.color}40;">
+          ${m.iconSVG}
+        </div>
+        <div class="milestone-info">
+          <div class="milestone-info-header">
+            <h5>${m.name}</h5>
+            <span class="milestone-progress-text">${progressValue}/${m.target} ${m.desc}</span>
+            <span class="milestone-progress-text">${Math.floor(progressPercent)}%</span>
+          </div>
+          <div class="milestone-progress-track">
+            <div class="milestone-progress-fill" style="width: ${progressPercent}%; background: ${m.color}; box-shadow: 0 0 8px ${m.color};"></div>
+          </div>
+          <div class="milestone-cluster">${m.cluster}</div>
+        </div>
+        <div class="milestone-sticker" style="color: ${m.color};">
+          ${m.constellationSVG}
+        </div>
+      `;
+      milestoneList.appendChild(item);
+    });
+  }
+}
 let isHandsClappedAboveHead = false;
+let currentExercise = 'claps'; // 'claps' or 'circles'
+
+// Circle State
+let leftAccumulatedAngle = 0;
+let rightAccumulatedAngle = 0;
+let leftPrevAngle = null;
+let rightPrevAngle = null;
+
 let soundEnabled = true;
 let isCameraActive = false;
 let videoStream = null;
@@ -41,13 +138,18 @@ let timerInterval = null;
 let timeLeft = 60;
 let isTimerActive = false;
 
-const focusToggleBtn = document.getElementById('focusToggleBtn');
-const focusIcon = document.getElementById('focusIcon');
-const focusText = document.getElementById('focusText');
+const timerLengthSelect = document.getElementById('timerLengthSelect');
+const keyboardHintOverlay = document.getElementById('keyboardHintOverlay');
+const keyboardHintText = document.getElementById('keyboardHintText');
+
+const dashboardToggleBtn = document.getElementById('dashboardToggleBtn');
+const dashboardDrawer = document.getElementById('dashboardDrawer');
+const constellationBtn = document.getElementById('constellationBtn');
+const constellationDropdown = document.getElementById('constellationDropdown');
+
 const overlayScore = document.getElementById('overlayScore');
 const overlayScoreValue = document.getElementById('overlayScoreValue');
 const appContainer = document.getElementById('app');
-let isFocusMode = false;
 
 const poseStatusBadge = document.getElementById('poseStatusBadge');
 const statusText = document.getElementById('statusText');
@@ -59,10 +161,22 @@ const fpsValue = document.getElementById('fpsValue');
 const distValue = document.getElementById('distValue');
 const overheadValue = document.getElementById('overheadValue');
 
-const proximityPercentage = document.getElementById('proximityPercentage');
-const proximityMeterFill = document.getElementById('proximityMeterFill');
-const elevationStatus = document.getElementById('elevationStatus');
-const elevationMeterFill = document.getElementById('elevationMeterFill');
+const meterOneLabel = document.getElementById('meterOneLabel');
+const meterOneValue = document.getElementById('meterOneValue');
+const meterOneFill = document.getElementById('meterOneFill');
+const meterOneMarker = document.getElementById('meterOneMarker');
+const meterOneSubtext = document.getElementById('meterOneSubtext');
+
+const meterTwoLabel = document.getElementById('meterTwoLabel');
+const meterTwoValue = document.getElementById('meterTwoValue');
+const meterTwoFill = document.getElementById('meterTwoFill');
+const meterTwoMarker = document.getElementById('meterTwoMarker');
+const meterTwoSubtext = document.getElementById('meterTwoSubtext');
+
+const scoreHint = document.getElementById('scoreHint');
+const exerciseSelect = document.getElementById('exerciseSelect');
+const instructionsClaps = document.getElementById('instructionsClaps');
+const instructionsCircles = document.getElementById('instructionsCircles');
 
 // Web Audio API Synthesizer
 let audioCtx = null;
@@ -158,11 +272,21 @@ function updateAndDrawParticles() {
 
 // Update Score Display
 function incrementScore(particleX, particleY) {
-  if (timeLeft === 0 && !isTimerActive && timerValue.textContent === "TIME'S UP!") return;
+  // Only block scoring if the timer challenge just finished and hasn't been reset
+  if (!isTimerActive && timerValue.textContent === "TIME'S UP!") return;
+  console.log("Scoring! Current score:", score + 1);
 
   score += 1;
   scoreValue.textContent = score;
   overlayScoreValue.textContent = score;
+  
+  // Progression
+  xp += xpPerClap;
+  if (xp >= xpPerLevel) {
+    level += 1;
+    xp -= xpPerLevel;
+  }
+  updateProgressionUI();
   
   // UI Animations
   scoreCard.classList.add('bounce', 'scored');
@@ -289,79 +413,74 @@ function onPoseResults(results) {
   }
 
   const landmarks = results.poseLandmarks;
+  drawSkeleton(landmarks);
 
-  // Key Landmarks: NOSE (0), LEFT_WRIST (15), RIGHT_WRIST (16)
+  if (currentExercise === 'claps') {
+    trackOverheadClaps(landmarks);
+  } else if (currentExercise === 'circles') {
+    trackArmCircles(landmarks);
+  }
+
+  // Draw any active burst particles
+  updateAndDrawParticles();
+}
+
+function trackOverheadClaps(landmarks) {
   const nose = landmarks[0];
   const leftWrist = landmarks[15];
   const rightWrist = landmarks[16];
 
   if (!nose || !leftWrist || !rightWrist) {
     updateUIForNoPose();
-    updateAndDrawParticles();
     return;
   }
 
-  // 1. Check Overhead Condition: Y=0 is top of screen, so Y < Nose.Y means above nose
   const isLeftWristAboveNose = leftWrist.y < nose.y;
   const isRightWristAboveNose = rightWrist.y < nose.y;
   const isOverhead = isLeftWristAboveNose && isRightWristAboveNose;
 
-  // 2. Check Proximity Condition: Normalized Euclidean distance between wrists
   const dx = leftWrist.x - rightWrist.x;
   const dy = leftWrist.y - rightWrist.y;
   const wristDistance = Math.sqrt(dx * dx + dy * dy);
   
-  // Normalized threshold < 0.15
   const PROXIMITY_THRESHOLD = 0.15;
-  const RESET_PROXIMITY_THRESHOLD = 0.22;
   const isClapped = wristDistance < PROXIMITY_THRESHOLD;
 
-  // Render Skeleton Overlay
-  drawSkeleton(landmarks);
-
-  // Update Real-time Telemetry & Meters
   distValue.textContent = wristDistance.toFixed(3);
   overheadValue.textContent = isOverhead ? 'YES' : 'NO';
   
-  // Proximity meter (mapped 0.35 -> 0.0)
   const proximityPercent = Math.min(100, Math.max(0, ((0.35 - wristDistance) / 0.35) * 100));
-  proximityPercentage.textContent = `${Math.round(proximityPercent)}%`;
-  proximityMeterFill.style.width = `${proximityPercent}%`;
+  meterOneValue.textContent = `${Math.round(proximityPercent)}%`;
+  meterOneFill.style.width = `${proximityPercent}%`;
   if (isClapped) {
-    proximityMeterFill.className = 'meter-bar-fill meter-purple';
+    meterOneFill.className = 'meter-bar-fill meter-purple';
   } else {
-    proximityMeterFill.className = 'meter-bar-fill meter-blue';
+    meterOneFill.className = 'meter-bar-fill meter-blue';
   }
 
-  // Elevation meter
-  elevationStatus.textContent = isOverhead ? 'YES 🙌' : 'NO';
+  meterTwoValue.textContent = isOverhead ? 'YES 🙌' : 'NO';
   const noseY = nose.y;
   const avgWristY = (leftWrist.y + rightWrist.y) / 2;
-  const heightDiff = noseY - avgWristY; // Positive when wrists above nose
+  const heightDiff = noseY - avgWristY; 
   const elevationPercent = Math.min(100, Math.max(0, (heightDiff / 0.4 + 0.3) * 100));
-  elevationMeterFill.style.width = `${elevationPercent}%`;
+  meterTwoFill.style.width = `${elevationPercent}%`;
 
-  // 3. Gesture Logic & State Lock (Debouncing)
   const midWristPxX = ((leftWrist.x + rightWrist.x) / 2) * canvas.width;
   const midWristPxY = ((leftWrist.y + rightWrist.y) / 2) * canvas.height;
 
   if (isOverhead && isClapped) {
     if (!isHandsClappedAboveHead) {
-      // Transition: Just clapped above head!
       isHandsClappedAboveHead = true;
       incrementScore(midWristPxX, midWristPxY);
     }
-    
-    // Status Display
     poseStatusBadge.className = 'status-badge status-active';
-    statusText.textContent = 'SCORED! 🙌 Lower hands to clap again.';
+    statusText.textContent = 'SCORED! 🙌 Lower hands or separate them to score again.';
     targetBanner.classList.remove('hidden');
+    targetBanner.innerHTML = '<span>🙌 HANDS CLAPPED ABOVE HEAD DETECTED</span>';
   } else {
-    // Check release / lowering condition to reset state lock
-    if (!isOverhead || wristDistance > RESET_PROXIMITY_THRESHOLD) {
+    if (!isOverhead || !isClapped) {
       isHandsClappedAboveHead = false;
     }
-
     targetBanner.classList.add('hidden');
     poseStatusBadge.className = 'status-badge status-tracking';
 
@@ -373,6 +492,100 @@ function onPoseResults(results) {
       statusText.textContent = 'Tracking Pose - Clap hands high above head!';
     }
   }
+}
+
+function trackArmCircles(landmarks) {
+  const leftShoulder = landmarks[11];
+  const rightShoulder = landmarks[12];
+  const leftWrist = landmarks[15];
+  const rightWrist = landmarks[16];
+
+  if (!leftShoulder || !rightShoulder || !leftWrist || !rightWrist) {
+    updateUIForNoPose();
+    return;
+  }
+
+  const EXTENSION_THRESHOLD = 0.2; // roughly extended arm
+  const PI2 = 2 * Math.PI;
+
+  const leftDx = leftWrist.x - leftShoulder.x;
+  const leftDy = leftWrist.y - leftShoulder.y;
+  const rightDx = rightWrist.x - rightShoulder.x;
+  const rightDy = rightWrist.y - rightShoulder.y;
+
+  const leftDist = Math.sqrt(leftDx * leftDx + leftDy * leftDy);
+  const rightDist = Math.sqrt(rightDx * rightDx + rightDy * rightDy);
+
+  const isLeftExtended = leftDist > EXTENSION_THRESHOLD;
+  const isRightExtended = rightDist > EXTENSION_THRESHOLD;
+
+  let leftAngle = Math.atan2(leftDy, leftDx);
+  let rightAngle = Math.atan2(rightDy, rightDx);
+
+  if (isLeftExtended) {
+    if (leftPrevAngle !== null) {
+      let delta = leftAngle - leftPrevAngle;
+      if (delta > Math.PI) delta -= PI2;
+      if (delta < -Math.PI) delta += PI2;
+      leftAccumulatedAngle += delta;
+    }
+    leftPrevAngle = leftAngle;
+  } else {
+    leftPrevAngle = null;
+  }
+
+  if (isRightExtended) {
+    if (rightPrevAngle !== null) {
+      let delta = rightAngle - rightPrevAngle;
+      if (delta > Math.PI) delta -= PI2;
+      if (delta < -Math.PI) delta += PI2;
+      rightAccumulatedAngle += delta;
+    }
+    rightPrevAngle = rightAngle;
+  } else {
+    rightPrevAngle = null;
+  }
+
+  // Update Extension Meter
+  const extensionPercent = Math.min(100, (Math.min(leftDist, rightDist) / 0.4) * 100);
+  meterOneValue.textContent = `${Math.round(extensionPercent)}%`;
+  meterOneFill.style.width = `${extensionPercent}%`;
+  meterOneFill.className = (isLeftExtended && isRightExtended) ? 'meter-bar-fill meter-purple' : 'meter-bar-fill meter-blue';
+
+  // Update Circle Progress
+  const avgCircleProgress = (Math.abs(leftAccumulatedAngle) + Math.abs(rightAccumulatedAngle)) / 2;
+  const progressPercent = Math.min(100, (avgCircleProgress / PI2) * 100);
+  meterTwoValue.textContent = `${Math.round(progressPercent)}%`;
+  meterTwoFill.style.width = `${progressPercent}%`;
+
+  distValue.textContent = leftDist.toFixed(2);
+  overheadValue.textContent = rightDist.toFixed(2);
+
+  if (!isLeftExtended || !isRightExtended) {
+    poseStatusBadge.className = 'status-badge status-tracking';
+    statusText.textContent = 'Extend your arms straight out to begin circles!';
+    targetBanner.classList.add('hidden');
+    return;
+  }
+
+  if (Math.abs(leftAccumulatedAngle) >= PI2 && Math.abs(rightAccumulatedAngle) >= PI2) {
+    // Both completed a circle
+    leftAccumulatedAngle -= Math.sign(leftAccumulatedAngle) * PI2;
+    rightAccumulatedAngle -= Math.sign(rightAccumulatedAngle) * PI2;
+    
+    const midPxX = ((leftWrist.x + rightWrist.x) / 2) * canvas.width;
+    const midPxY = ((leftWrist.y + rightWrist.y) / 2) * canvas.height;
+    incrementScore(midPxX, midPxY);
+    
+    poseStatusBadge.className = 'status-badge status-active';
+    statusText.textContent = 'SCORED! 🙌 Keep spinning!';
+    targetBanner.classList.remove('hidden');
+    targetBanner.innerHTML = '<span>🙌 FULL CIRCLE COMPLETED</span>';
+  } else {
+    poseStatusBadge.className = 'status-badge status-tracking';
+    statusText.textContent = `Circling... ${Math.round(progressPercent)}% complete`;
+    targetBanner.classList.add('hidden');
+  }
 
   // Draw any active burst particles
   updateAndDrawParticles();
@@ -381,10 +594,10 @@ function onPoseResults(results) {
 function updateUIForNoPose() {
   distValue.textContent = '--';
   overheadValue.textContent = '--';
-  proximityPercentage.textContent = '0%';
-  proximityMeterFill.style.width = '0%';
-  elevationStatus.textContent = 'NO';
-  elevationMeterFill.style.width = '0%';
+  meterOneValue.textContent = '0%';
+  meterOneFill.style.width = '0%';
+  meterTwoValue.textContent = 'NO';
+  meterTwoFill.style.width = '0%';
   
   if (isCameraActive) {
     poseStatusBadge.className = 'status-badge status-idle';
@@ -508,6 +721,12 @@ async function startCamera() {
 
     cameraBtnText.textContent = 'Stop Camera';
     cameraToggleBtn.classList.replace('btn-primary', 'btn-secondary');
+
+    keyboardHintText.innerHTML = 'Press <kbd>Space</kbd> to Start Timer';
+    if (!isTimerActive) {
+      keyboardHintOverlay.classList.remove('hidden');
+    }
+
     loadingOverlay.classList.add('hidden');
 
     poseStatusBadge.className = 'status-badge status-tracking';
@@ -553,6 +772,10 @@ function stopCamera() {
 
   poseStatusBadge.className = 'status-badge status-idle';
   statusText.textContent = 'Camera Inactive - Click "Start Camera"';
+  
+  keyboardHintText.innerHTML = 'Press <kbd>C</kbd> to Start Camera';
+  keyboardHintOverlay.classList.remove('hidden');
+  
   updateUIForNoPose();
 }
 
@@ -569,7 +792,16 @@ resetScoreBtn.addEventListener('click', () => {
   score = 0;
   scoreValue.textContent = '0';
   overlayScoreValue.textContent = '0';
+  xp = 0;
+  level = 1;
   isHandsClappedAboveHead = false;
+  
+  if (timerValue.textContent === "TIME'S UP!") {
+    timeLeft = parseInt(timerLengthSelect.value, 10) || 60;
+    updateTimerDisplay();
+  }
+  
+  updateProgressionUI();
   scoreCard.classList.add('bounce');
   overlayScore.classList.add('bounce');
   setTimeout(() => {
@@ -578,16 +810,24 @@ resetScoreBtn.addEventListener('click', () => {
   }, 300);
 });
 
-focusToggleBtn.addEventListener('click', () => {
-  isFocusMode = !isFocusMode;
-  if (isFocusMode) {
-    appContainer.classList.add('focus-mode');
-    focusIcon.textContent = 'Minimize';
-    focusText.textContent = 'Exit Focus';
-  } else {
-    appContainer.classList.remove('focus-mode');
-    focusIcon.textContent = '👁️';
-    focusText.textContent = 'Focus';
+dashboardToggleBtn.addEventListener('click', () => {
+  dashboardDrawer.classList.toggle('open');
+});
+
+constellationBtn.addEventListener('click', (e) => {
+  // Prevent click from propagating to document
+  e.stopPropagation();
+  constellationDropdown.classList.toggle('hidden');
+});
+
+// Close dropdown and drawer when clicking outside
+document.addEventListener('click', (e) => {
+  if (!constellationBtn.contains(e.target)) {
+    constellationDropdown.classList.add('hidden');
+  }
+  
+  if (!dashboardToggleBtn.contains(e.target) && !dashboardDrawer.contains(e.target)) {
+    dashboardDrawer.classList.remove('open');
   }
 });
 
@@ -600,10 +840,11 @@ function startTimer() {
   overlayScoreValue.textContent = '0';
   isHandsClappedAboveHead = false;
   
-  timeLeft = 60;
+  timeLeft = parseInt(timerLengthSelect.value, 10) || 60;
   isTimerActive = true;
   timerBtnText.textContent = 'Stop';
   timerDisplay.classList.remove('danger');
+  keyboardHintOverlay.classList.add('hidden');
   updateTimerDisplay();
   
   timerInterval = setInterval(() => {
@@ -626,6 +867,10 @@ function stopTimer() {
   clearInterval(timerInterval);
   timerBtnText.textContent = 'Start';
   timerDisplay.classList.remove('danger');
+  if (isCameraActive) {
+    keyboardHintText.innerHTML = 'Press <kbd>Space</kbd> to Start Timer';
+    keyboardHintOverlay.classList.remove('hidden');
+  }
 }
 
 function updateTimerDisplay() {
@@ -637,7 +882,8 @@ function updateTimerDisplay() {
 timerBtn.addEventListener('click', () => {
   if (isTimerActive) {
     stopTimer();
-    timerValue.textContent = '01:00';
+    timeLeft = parseInt(timerLengthSelect.value, 10) || 60;
+    updateTimerDisplay();
   } else {
     startTimer();
   }
@@ -649,7 +895,71 @@ soundToggleBtn.addEventListener('click', () => {
   soundToggleBtn.title = soundEnabled ? 'Audio Enabled' : 'Audio Muted';
 });
 
+timerLengthSelect.addEventListener('change', () => {
+  if (!isTimerActive) {
+    timeLeft = parseInt(timerLengthSelect.value, 10) || 60;
+    updateTimerDisplay();
+  }
+});
+
+exerciseSelect.addEventListener('change', () => {
+  currentExercise = exerciseSelect.value;
+  
+  if (currentExercise === 'claps') {
+    meterOneLabel.textContent = 'Wrist Proximity (Clap)';
+    meterOneSubtext.textContent = 'Clap when distance < 0.15';
+    meterTwoLabel.textContent = 'Elevation (Y-Axis)';
+    meterTwoSubtext.textContent = 'Both wrists must rise above nose (Y < Nose Y)';
+    scoreHint.textContent = 'Clap both hands high above your head to score +1';
+    
+    instructionsClaps.classList.remove('hidden');
+    instructionsCircles.classList.add('hidden');
+  } else if (currentExercise === 'circles') {
+    meterOneLabel.textContent = 'Arm Extension';
+    meterOneSubtext.textContent = 'Keep both arms fully extended straight out';
+    meterTwoLabel.textContent = 'Circle Progress';
+    meterTwoSubtext.textContent = 'Complete a full 360° rotation';
+    scoreHint.textContent = 'Extend your arms and make full circles to score +1';
+    
+    instructionsClaps.classList.add('hidden');
+    instructionsCircles.classList.remove('hidden');
+  }
+  
+  // Reset tracking states
+  leftAccumulatedAngle = 0;
+  rightAccumulatedAngle = 0;
+  leftPrevAngle = null;
+  rightPrevAngle = null;
+  isHandsClappedAboveHead = false;
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  // Prevent spacebar from scrolling the page
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (isCameraActive) {
+      if (isTimerActive) {
+        stopTimer();
+        timeLeft = parseInt(timerLengthSelect.value, 10) || 60;
+        updateTimerDisplay();
+      } else {
+        startTimer();
+      }
+    }
+  } else if (e.key === 'c' || e.key === 'C') {
+    if (isCameraActive) {
+      stopCamera();
+    } else {
+      startCamera();
+    }
+  }
+});
+
 // Auto-initialize pose detector on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   initPoseDetector();
+  updateProgressionUI();
+  timeLeft = parseInt(timerLengthSelect.value, 10) || 60;
+  updateTimerDisplay();
 });
