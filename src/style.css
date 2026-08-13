@@ -51,7 +51,7 @@ body {
   position: relative;
   z-index: 100;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
   background: var(--bg-card);
@@ -548,6 +548,71 @@ body {
   gap: 1rem;
 }
 
+.timer-end-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgba(4, 9, 20, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+.timer-end-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.game-over-popup {
+  background: rgba(10, 14, 26, 0.95);
+  border: 2px solid var(--primary);
+  padding: 3rem 4rem;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(78, 142, 255, 0.3);
+  transform: scale(1);
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.game-over-title {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 1.5rem 0;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  letter-spacing: 2px;
+}
+
+.game-over-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.game-over-label {
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.game-over-value {
+  font-family: var(--font-heading);
+  font-size: 5rem;
+  font-weight: 900;
+  background: linear-gradient(180deg, #ffffff 0%, var(--primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+  filter: drop-shadow(0 4px 8px rgba(78, 142, 255, 0.4));
+}
+
 .spinner {
   width: 44px;
   height: 44px;
@@ -825,6 +890,36 @@ body {
 .sticker-slot:hover {
   transform: translateY(-2px);
   background: rgba(255, 255, 255, 0.05);
+}
+
+.sticker-slot::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(10, 14, 26, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 100;
+  border: 1px solid rgba(78, 142, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 10px rgba(78, 142, 255, 0.2);
+  text-shadow: 0 0 5px rgba(78, 142, 255, 0.3);
+}
+
+.sticker-slot:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .sticker-icon {
@@ -1257,4 +1352,89 @@ kbd {
 
 .right-spark {
   animation: circleRight 2s infinite linear;
+}
+
+/* Daily Habit Tracker Calendar */
+.daily-goal-header {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-top: 0.5rem;
+}
+
+.day-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.3);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.day-cell.partial {
+  background: rgba(0, 242, 254, 0.15);
+  border-color: rgba(0, 242, 254, 0.4);
+  color: rgba(0, 242, 254, 0.8);
+}
+
+.day-cell.completed {
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(250, 157, 40, 0.6);
+  animation: pulse-star 2s infinite alternate;
+}
+
+.day-cell-empty {
+  visibility: hidden;
+}
+
+/* Custom Tooltip for Star Log */
+.day-cell::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(10, 14, 26, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 100;
+  border: 1px solid rgba(78, 142, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 10px rgba(78, 142, 255, 0.2);
+  text-shadow: 0 0 5px rgba(78, 142, 255, 0.3);
+}
+
+.day-cell:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@keyframes pulse-star {
+  0% { box-shadow: 0 0 10px rgba(250, 157, 40, 0.4); }
+  100% { box-shadow: 0 0 25px rgba(250, 157, 40, 1); }
 }

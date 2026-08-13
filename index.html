@@ -19,7 +19,16 @@
 <body>
   <div id="app" class="app-container">
     <!-- Header Navbar -->
-    <header class="app-header">      <!-- Constellation Progress -->
+    <header class="app-header">
+      
+      <!-- Brand Logo -->
+      <div class="logo">
+        <div class="logo-text">
+          <h1><span class="brand-cosmic">Cosmic</span><span class="brand-fit">Fit</span></h1>
+        </div>
+      </div>
+
+      <!-- Constellation Progress -->
       <div class="constellation-progress-container" id="constellationBtn">
         <div class="progress-stats">
           <span id="levelText" class="level-text">Level 1</span>
@@ -89,6 +98,17 @@
             <div id="loadingOverlay" class="loading-overlay hidden">
               <div class="spinner"></div>
               <p id="loadingText">Loading AI Pose Model...</p>
+            </div>
+
+            <!-- Timer End Overlay -->
+            <div id="timerEndOverlay" class="timer-end-overlay hidden">
+              <div class="game-over-popup">
+                <h2 class="game-over-title">TIME'S UP!</h2>
+                <div class="game-over-score">
+                  <span class="game-over-label">You scored</span>
+                  <span id="timerEndText" class="game-over-value">0</span>
+                </div>
+              </div>
             </div>
 
             <!-- Keyboard Hints Overlay -->
@@ -170,6 +190,17 @@
               <span id="scoreValue">0</span>
             </div>
             <p class="score-hint" id="scoreHint">Perform a half jumping jack to score +1</p>
+          </div>
+          
+          <!-- Daily Goal Calendar -->
+          <div class="telemetry-card" id="dailyGoalCard">
+            <h3>Star Log (Daily Goal)</h3>
+            <div class="daily-goal-header">
+              <span id="dailyGoalText">Today: 0 / 100 Points</span>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+              <!-- Grid populated by JS -->
+            </div>
           </div>
           
           <!-- Real-time Telemetry & Calibration Gauges -->
@@ -269,7 +300,7 @@
           <!-- Score Counter Display for Rewards Tab -->
           <div class="score-card" id="rewardsScoreCard">
             <div class="score-card-bg-glow"></div>
-            <span class="score-label">CURRENT SCORE</span>
+            <span class="score-label">DAILY SCORE</span>
             <div class="score-display">
               <span id="rewardsScoreValue">0</span>
             </div>

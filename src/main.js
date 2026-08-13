@@ -7,6 +7,7 @@ import { Pose } from '@mediapipe/pose';
 
 // Global State
 let score = 0;
+let totalScore = parseInt(localStorage.getItem('cosmicfit_total_score') || '0', 10);
 
 let level = 1;
 let xp = 0;
@@ -46,13 +47,21 @@ function updateProgressionUI() {
 
   if (milestoneList) {
     const isFirstRender = milestoneList.children.length === 0;
+    
+    // Get today's score
+    let dailyScores = JSON.parse(localStorage.getItem('cosmicfit_daily_scores') || '{}');
+    let todayStr = getTodayString();
+    let todayScore = dailyScores[todayStr] || 0;
+    
+    const rewardsScoreValue = document.getElementById('rewardsScoreValue');
+    if (rewardsScoreValue) rewardsScoreValue.textContent = todayScore;
 
     milestonesData.forEach((m, index) => {
       const prevTarget = index === 0 ? 0 : milestonesData[index-1].target;
       const targetDifference = m.target - prevTarget;
       
-      const isCompleted = score >= m.target;
-      const pointsInThisConstellation = Math.max(0, Math.min(score - prevTarget, targetDifference));
+      const isCompleted = todayScore >= m.target;
+      const pointsInThisConstellation = Math.max(0, Math.min(todayScore - prevTarget, targetDifference));
       
       // Determine how many stars there are (circles)
       const starCount = (m.iconSVG.match(/<circle/g) || []).length;
@@ -83,7 +92,7 @@ function updateProgressionUI() {
         item = document.createElement('div');
         item.style.setProperty('--card-accent', m.color);
         item.style.setProperty('--card-rgb', `${r}, ${g}, ${b}`);
-        item.title = `${m.name} (Requires ${m.target} Score)`;
+        item.setAttribute('data-tooltip', `${m.name} (Requires ${m.target} Score)`);
         
         item.innerHTML = `
           <div class="sticker-icon">
@@ -339,8 +348,18 @@ function incrementScore(particleX, particleY) {
   console.log("Scoring! Current score:", score + 1);
 
   score += 1;
+  totalScore += 1;
+  localStorage.setItem('cosmicfit_total_score', totalScore.toString());
+  
   scoreValue.textContent = score;
-  if (rewardsScoreValue) rewardsScoreValue.textContent = score;
+  
+  updateDailyScore();
+  
+  if (rewardsScoreValue) {
+    let dailyScores = JSON.parse(localStorage.getItem('cosmicfit_daily_scores') || '{}');
+    let todayStr = getTodayString();
+    rewardsScoreValue.textContent = dailyScores[todayStr] || 0;
+  }
   
   // Progression
   xp += xpPerClap;
@@ -908,8 +927,13 @@ cameraToggleBtn.addEventListener('click', () => {
 
 resetScoreBtn.addEventListener('click', () => {
   score = 0;
+  totalScore = 0;
+  localStorage.setItem('cosmicfit_total_score', '0');
+  localStorage.removeItem('cosmicfit_daily_scores');
+  
   scoreValue.textContent = '0';
   if (rewardsScoreValue) rewardsScoreValue.textContent = '0';
+  
   xp = 0;
   level = 1;
   isHandsClappedAboveHead = false;
@@ -981,21 +1005,39 @@ function startTimer() {
     }
     
     if (timeLeft <= 0) {
-      stopTimer();
+      stopTimer(true);
       overlayTimerValue.textContent = "TIME'S UP!";
     }
   }, 1000);
 }
 
-function stopTimer() {
+function stopTimer(isNaturalEnd = false) {
   isTimerActive = false;
   clearInterval(timerInterval);
   timerBtnText.textContent = 'Start';
   overlayTimer.classList.add('hidden');
   overlayTimer.classList.remove('danger');
-  if (isCameraActive) {
+  
+  if (isNaturalEnd) {
+    const timerEndOverlay = document.getElementById('timerEndOverlay');
+    const timerEndText = document.getElementById('timerEndText');
+    if (timerEndOverlay && timerEndText) {
+      timerEndText.textContent = score;
+      timerEndOverlay.classList.remove('hidden');
+      setTimeout(() => {
+        timerEndOverlay.classList.add('hidden');
+      }, 3000);
+    }
+  }
+  
+  if (isCameraActive && !isNaturalEnd) {
     keyboardHintText.innerHTML = 'Press <kbd>Space</kbd> to Start Timer';
     keyboardHintOverlay.classList.remove('hidden');
+  } else if (isCameraActive && isNaturalEnd) {
+    setTimeout(() => {
+      keyboardHintText.innerHTML = 'Press <kbd>Space</kbd> to Start Timer';
+      keyboardHintOverlay.classList.remove('hidden');
+    }, 3000);
   }
 }
 
@@ -1100,4 +1142,71 @@ document.addEventListener('DOMContentLoaded', () => {
   const activePill = document.querySelector('.pill-btn.active');
   timeLeft = activePill ? parseInt(activePill.dataset.value, 10) : 60;
   updateTimerDisplay();
+  
+  // Render calendar on load
+  let scores = JSON.parse(localStorage.getItem('cosmicfit_daily_scores') || '{}');
+  renderCalendar(scores);
 });
+
+// Daily Scoring & Calendar
+const DAILY_GOAL = 100;
+
+function getTodayString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function updateDailyScore() {
+  const today = getTodayString();
+  let scores = JSON.parse(localStorage.getItem('cosmicfit_daily_scores') || '{}');
+  
+  if (!scores[today]) {
+    scores[today] = 0;
+  }
+  
+  scores[today] += 1;
+  localStorage.setItem('cosmicfit_daily_scores', JSON.stringify(scores));
+  
+  renderCalendar(scores);
+}
+
+function renderCalendar(scores) {
+  const calendarGrid = document.getElementById('calendarGrid');
+  const dailyGoalText = document.getElementById('dailyGoalText');
+  if (!calendarGrid || !dailyGoalText) return;
+  
+  const todayStr = getTodayString();
+  const todayScore = scores[todayStr] || 0;
+  
+  dailyGoalText.textContent = `Today: ${todayScore} / ${DAILY_GOAL} Points`;
+  
+  calendarGrid.innerHTML = '';
+  
+  const todayDate = new Date();
+  const daysToRender = 35; // 5 weeks
+  
+  const startDate = new Date(todayDate);
+  startDate.setDate(todayDate.getDate() - daysToRender + 1);
+  
+  for (let i = 0; i < daysToRender; i++) {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const s = scores[dateStr] || 0;
+    
+    const cell = document.createElement('div');
+    cell.className = 'day-cell';
+    cell.setAttribute('data-tooltip', `${d.toDateString()}: ${s} Points`);
+    
+    cell.textContent = d.getDate();
+    
+    if (s >= DAILY_GOAL) {
+      cell.classList.add('completed');
+    } else if (s > 0) {
+      cell.classList.add('partial');
+    }
+    
+    calendarGrid.appendChild(cell);
+  }
+}
