@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cosmic Fit | Your Gamified AI Fitness Journey</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  
+  <!-- MediaPipe Pose Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+  
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app" class="app-container">
+    <!-- Header Navbar -->
+    <header class="app-header">
+      <div class="logo">
+        <div class="logo-icon-sparkles">
+          <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Large upper sparkle star -->
+            <path d="M28 2Q28 16 42 16Q28 16 28 30Q28 16 14 16Q28 16 28 2Z" fill="#4E8EFF" />
+            <!-- Small lower sparkle star -->
+            <path d="M12 21Q12 29 20 29Q12 29 12 37Q12 29 4 29Q12 29 12 21Z" fill="#4E8EFF" />
+          </svg>
+        </div>
+        <div class="logo-text">
+          <h1><span class="brand-cosmic">Cosmic</span> <span class="brand-fit">Fit</span></h1>
+          <p class="tagline">Your gamified AI fitness journey.</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="timer-display" id="timerDisplay">
+          <span id="timerValue">01:00</span>
+        </div>
+        <button id="timerBtn" class="btn btn-secondary icon-btn" title="1 Min Challenge">
+          <span>⏱️</span> <span id="timerBtnText">Start</span>
+        </button>
+        <button id="focusToggleBtn" class="btn btn-secondary icon-btn" title="Toggle Focus Mode">
+          <span id="focusIcon">👁️</span> <span id="focusText">Focus</span>
+        </button>
+        <button id="soundToggleBtn" class="btn btn-secondary icon-btn" title="Toggle Sound">
+          <span id="soundIcon">🔊</span> Audio
+        </button>
+        <button id="resetScoreBtn" class="btn btn-secondary" title="Reset Score">
+          <span>🔄</span> Reset
+        </button>
+        <button id="cameraToggleBtn" class="btn btn-primary" title="Start/Stop Camera">
+          <span class="btn-icon">📷</span> <span id="cameraBtnText">Start Camera</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Left / Top: Viewport Container -->
+      <section class="viewport-section">
+        <div class="viewport-card">
+          <!-- Video & Canvas Overlay -->
+          <div class="media-container" id="mediaContainer">
+            <video id="webcam" playsinline muted></video>
+            <canvas id="skeletonCanvas"></canvas>
+
+            <!-- Overlay Score (Focus Mode Only) -->
+            <div id="overlayScore" class="overlay-score">
+              <span id="overlayScoreValue">0</span>
+            </div>
+
+            <!-- Status Badge Overlay -->
+            <div id="poseStatusBadge" class="status-badge status-idle">
+              <span class="status-dot"></span>
+              <span id="statusText">Camera Inactive - Click 'Start Camera'</span>
+            </div>
+
+            <!-- Floating Target Banner when Pose Active -->
+            <div id="targetBanner" class="target-banner hidden">
+              <span>🙌 HANDS ABOVE HEAD DETECTED</span>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div id="loadingOverlay" class="loading-overlay hidden">
+              <div class="spinner"></div>
+              <p id="loadingText">Loading AI Pose Model...</p>
+            </div>
+          </div>
+
+          <!-- Camera Controls bar beneath viewport -->
+          <div class="viewport-footer">
+            <div class="telemetry-pill">
+              <span class="label">FPS:</span>
+              <span id="fpsValue" class="value">0</span>
+            </div>
+            <div class="telemetry-pill">
+              <span class="label">Wrist Dist:</span>
+              <span id="distValue" class="value">--</span>
+            </div>
+            <div class="telemetry-pill">
+              <span class="label">Overhead:</span>
+              <span id="overheadValue" class="value">--</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right / Bottom: Dashboard Panel -->
+      <aside class="dashboard-section">
+        <!-- Main Score Counter Display -->
+        <div class="score-card" id="scoreCard">
+          <div class="score-card-bg-glow"></div>
+          <span class="score-label">CURRENT SCORE</span>
+          <div class="score-display">
+            <span id="scoreValue">0</span>
+          </div>
+          <p class="score-hint">Clap both hands high above your head to score +1</p>
+        </div>
+
+        <!-- Real-time Telemetry & Calibration Gauges -->
+        <div class="telemetry-card">
+          <h3>Gesture Telemetry</h3>
+
+          <!-- Proximity Meter -->
+          <div class="meter-group">
+            <div class="meter-label-row">
+              <span>Wrist Proximity (Clap)</span>
+              <span id="proximityPercentage">0%</span>
+            </div>
+            <div class="meter-bar-track">
+              <div id="proximityMeterFill" class="meter-bar-fill meter-blue" style="width: 0%"></div>
+              <div class="meter-threshold-marker" style="left: 15%" title="Target Threshold (15%)"></div>
+            </div>
+            <div class="meter-subtext">Clap when distance &lt; 0.15</div>
+          </div>
+
+          <!-- Elevation Meter -->
+          <div class="meter-group">
+            <div class="meter-label-row">
+              <span>Wrists Above Nose Height</span>
+              <span id="elevationStatus">NO</span>
+            </div>
+            <div class="meter-bar-track">
+              <div id="elevationMeterFill" class="meter-bar-fill meter-purple" style="width: 0%"></div>
+            </div>
+            <div class="meter-subtext">Both wrists must rise above nose (Y &lt; Nose Y)</div>
+          </div>
+        </div>
+
+        <!-- Instruction Guide Card -->
+        <div class="instructions-card">
+          <h3>How to Play</h3>
+          <ol class="steps-list">
+            <li>
+              <span class="step-num">1</span>
+              <span>Allow webcam access and step back so your head and hands are visible.</span>
+            </li>
+            <li>
+              <span class="step-num">2</span>
+              <span>Raise both hands completely <strong>above your nose level</strong>.</span>
+            </li>
+            <li>
+              <span class="step-num">3</span>
+              <span>Bring your wrists together in a <strong>clapping motion</strong>.</span>
+            </li>
+            <li>
+              <span class="step-num">4</span>
+              <span>Lower your hands to reset before clapping again!</span>
+            </li>
+          </ol>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
