@@ -104,6 +104,8 @@ let leftAccumulatedAngle = 0;
 let rightAccumulatedAngle = 0;
 let leftPrevAngle = null;
 let rightPrevAngle = null;
+let leftPrevWrist = null;
+let rightPrevWrist = null;
 
 let soundEnabled = true;
 let isCameraActive = false;
@@ -446,6 +448,20 @@ function trackOverheadClaps(landmarks) {
   const PROXIMITY_THRESHOLD = 0.15;
   const isClapped = wristDistance < PROXIMITY_THRESHOLD;
 
+  // Visual Cue: Draw Target Zone for Claps
+  ctx.save();
+  ctx.beginPath();
+  const targetX = nose.x * canvas.width;
+  const targetY = (nose.y * canvas.height) - (canvas.height * 0.15); // Above the head
+  ctx.arc(targetX, targetY, 40, 0, 2 * Math.PI);
+  ctx.strokeStyle = isOverhead ? 'rgba(250, 157, 40, 0.8)' : 'rgba(78, 142, 255, 0.4)';
+  ctx.lineWidth = 4;
+  ctx.setLineDash([10, 10]);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(78, 142, 255, 0.1)';
+  ctx.fill();
+  ctx.restore();
+
   distValue.textContent = wristDistance.toFixed(3);
   overheadValue.textContent = isOverhead ? 'YES' : 'NO';
   
@@ -508,43 +524,77 @@ function trackArmCircles(landmarks) {
   const EXTENSION_THRESHOLD = 0.2; // roughly extended arm
   const PI2 = 2 * Math.PI;
 
-  const leftDx = leftWrist.x - leftShoulder.x;
-  const leftDy = leftWrist.y - leftShoulder.y;
-  const rightDx = rightWrist.x - rightShoulder.x;
-  const rightDy = rightWrist.y - rightShoulder.y;
-
-  const leftDist = Math.sqrt(leftDx * leftDx + leftDy * leftDy);
-  const rightDist = Math.sqrt(rightDx * rightDx + rightDy * rightDy);
+  const leftDist = Math.hypot(leftWrist.x - leftShoulder.x, leftWrist.y - leftShoulder.y);
+  const rightDist = Math.hypot(rightWrist.x - rightShoulder.x, rightWrist.y - rightShoulder.y);
 
   const isLeftExtended = leftDist > EXTENSION_THRESHOLD;
   const isRightExtended = rightDist > EXTENSION_THRESHOLD;
 
-  let leftAngle = Math.atan2(leftDy, leftDx);
-  let rightAngle = Math.atan2(rightDy, rightDx);
-
-  if (isLeftExtended) {
-    if (leftPrevAngle !== null) {
-      let delta = leftAngle - leftPrevAngle;
-      if (delta > Math.PI) delta -= PI2;
-      if (delta < -Math.PI) delta += PI2;
-      leftAccumulatedAngle += delta;
+  // Velocity angle tracking
+  if (isLeftExtended && leftPrevWrist) {
+    const vx = leftWrist.x - leftPrevWrist.x;
+    const vy = leftWrist.y - leftPrevWrist.y;
+    // Only accumulate if moving enough to avoid jitter noise
+    if (Math.hypot(vx, vy) > 0.005) {
+      let velAngle = Math.atan2(vy, vx);
+      if (leftPrevAngle !== null) {
+        let delta = velAngle - leftPrevAngle;
+        if (delta > Math.PI) delta -= PI2;
+        if (delta < -Math.PI) delta += PI2;
+        leftAccumulatedAngle += delta;
+      }
+      leftPrevAngle = velAngle;
     }
-    leftPrevAngle = leftAngle;
   } else {
     leftPrevAngle = null;
   }
+  leftPrevWrist = { x: leftWrist.x, y: leftWrist.y };
 
-  if (isRightExtended) {
-    if (rightPrevAngle !== null) {
-      let delta = rightAngle - rightPrevAngle;
-      if (delta > Math.PI) delta -= PI2;
-      if (delta < -Math.PI) delta += PI2;
-      rightAccumulatedAngle += delta;
+  if (isRightExtended && rightPrevWrist) {
+    const vx = rightWrist.x - rightPrevWrist.x;
+    const vy = rightWrist.y - rightPrevWrist.y;
+    if (Math.hypot(vx, vy) > 0.005) {
+      let velAngle = Math.atan2(vy, vx);
+      if (rightPrevAngle !== null) {
+        let delta = velAngle - rightPrevAngle;
+        if (delta > Math.PI) delta -= PI2;
+        if (delta < -Math.PI) delta += PI2;
+        rightAccumulatedAngle += delta;
+      }
+      rightPrevAngle = velAngle;
     }
-    rightPrevAngle = rightAngle;
   } else {
     rightPrevAngle = null;
   }
+  rightPrevWrist = { x: rightWrist.x, y: rightWrist.y };
+
+  // Visual Cue: Draw Circle Progress Arcs around wrists
+  const drawArc = (wrist, accumulatedAngle) => {
+    ctx.save();
+    const cx = wrist.x * canvas.width;
+    const cy = wrist.y * canvas.height;
+    const radius = 40;
+    const progress = Math.min(1, Math.abs(accumulatedAngle) / PI2);
+    
+    // Draw background track
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, PI2);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 6;
+    ctx.stroke();
+    
+    // Draw progress arc
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, -Math.PI/2, -Math.PI/2 + (progress * PI2), false);
+    ctx.strokeStyle = 'rgba(250, 157, 40, 0.9)'; // Accent color
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.restore();
+  };
+
+  drawArc(leftWrist, leftAccumulatedAngle);
+  drawArc(rightWrist, rightAccumulatedAngle);
 
   // Update Extension Meter
   const extensionPercent = Math.min(100, (Math.min(leftDist, rightDist) / 0.4) * 100);
@@ -930,6 +980,8 @@ exerciseSelect.addEventListener('change', () => {
   rightAccumulatedAngle = 0;
   leftPrevAngle = null;
   rightPrevAngle = null;
+  leftPrevWrist = null;
+  rightPrevWrist = null;
   isHandsClappedAboveHead = false;
 });
 
