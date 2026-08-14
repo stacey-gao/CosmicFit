@@ -537,6 +537,17 @@ body {
 }
 
 /* Loading Overlay */
+.center-camera-btn-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 14, 26, 0.4);
+  backdrop-filter: blur(4px);
+}
+
 .loading-overlay {
   position: absolute;
   inset: 0;

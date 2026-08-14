@@ -871,6 +871,9 @@ async function startCamera() {
 
     cameraBtnText.textContent = 'Stop Camera';
     cameraToggleBtn.classList.replace('btn-primary', 'btn-secondary');
+    
+    const centerOverlay = document.getElementById('centerCameraBtnOverlay');
+    if (centerOverlay) centerOverlay.classList.add('hidden');
 
     keyboardHintText.innerHTML = 'Press <kbd>Space</kbd> to Start Timer';
     if (!isTimerActive) {
@@ -916,9 +919,11 @@ function stopCamera() {
 
   webcam.srcObject = null;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
   cameraBtnText.textContent = 'Start Camera';
   cameraToggleBtn.classList.replace('btn-secondary', 'btn-primary');
+    
+  const centerOverlay = document.getElementById('centerCameraBtnOverlay');
+  if (centerOverlay) centerOverlay.classList.remove('hidden');
 
   poseStatusBadge.className = 'status-badge status-idle';
   statusText.textContent = 'Camera Inactive - Click "Start Camera"';
@@ -930,13 +935,19 @@ function stopCamera() {
 }
 
 // Event Listeners
-cameraToggleBtn.addEventListener('click', () => {
+const toggleFn = () => {
   if (isCameraActive) {
     stopCamera();
   } else {
     startCamera();
   }
-});
+};
+cameraToggleBtn.addEventListener('click', toggleFn);
+
+const centerCameraBtn = document.getElementById('centerCameraBtn');
+if (centerCameraBtn) {
+  centerCameraBtn.addEventListener('click', toggleFn);
+}
 
 resetScoreBtn.addEventListener('click', () => {
   score = 0;
@@ -1007,7 +1018,7 @@ function startTimer() {
   timeLeft = activePill ? parseInt(activePill.dataset.value, 10) : 60;
   
   isTimerActive = true;
-  timerBtnText.textContent = 'Stop';
+  timerBtnText.textContent = 'Stop Timer';
   overlayTimer.classList.remove('hidden');
   overlayTimer.classList.remove('danger');
   keyboardHintOverlay.classList.add('hidden');
@@ -1031,7 +1042,7 @@ function startTimer() {
 function stopTimer(isNaturalEnd = false) {
   isTimerActive = false;
   clearInterval(timerInterval);
-  timerBtnText.textContent = 'Start';
+  timerBtnText.textContent = 'Start Timer';
   overlayTimer.classList.add('hidden');
   overlayTimer.classList.remove('danger');
   
@@ -1104,7 +1115,7 @@ segmentBtns.forEach(btn => {
       meterTwoLabel.textContent = 'Elevation (Y-Axis)';
       meterTwoSubtext.textContent = 'Both wrists must rise above nose (Y < Nose Y)';
       scoreHint.textContent = 'Perform a half jumping jack to score +1';
-      quickInstructionText.textContent = 'Start with hands at your sides, then bring both hands together high above your head to score.';
+      if (quickInstructionText) quickInstructionText.textContent = 'Start with hands at your sides, then bring both hands together high above your head to score.';
       
       instructionsClaps.classList.remove('hidden');
       instructionsCircles.classList.add('hidden');
@@ -1114,7 +1125,7 @@ segmentBtns.forEach(btn => {
       meterTwoLabel.textContent = 'Circle Progress';
       meterTwoSubtext.textContent = 'Complete a full 360° rotation';
       scoreHint.textContent = 'Extend your arms and make full circles to score +1';
-      quickInstructionText.textContent = 'Extend arms straight out. Draw large circles in the air, ensuring your hands reach above the glowing target line.';
+      if (quickInstructionText) quickInstructionText.textContent = 'Extend arms straight out. Draw large circles in the air, ensuring your hands reach above the glowing target line.';
       
       instructionsClaps.classList.add('hidden');
       instructionsCircles.classList.remove('hidden');

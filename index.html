@@ -142,8 +142,11 @@
             </div>
 
             <div class="controls-row justify-center">
+              <button id="cameraToggleBtn" class="btn btn-primary" title="Start/Stop Camera">
+                <span id="cameraBtnText">Start Camera</span>
+              </button>
               <button id="timerBtn" class="btn btn-secondary" title="1 Min Challenge">
-                <span id="timerBtnText">Start</span>
+                <span id="timerBtnText">Start Timer</span>
               </button>
 
               <button id="soundToggleBtn" class="btn btn-secondary" title="Toggle Sound">
@@ -152,15 +155,59 @@
               <button id="resetScoreBtn" class="btn btn-danger" title="Reset Session Score">
                 Reset
               </button>
-              <button id="settingsBtn" class="btn btn-secondary" title="Settings">
-                ⚙️
-              </button>
-              <button id="cameraToggleBtn" class="btn btn-primary" title="Start/Stop Camera">
-                <span id="cameraBtnText">Start Camera</span>
+              <button id="settingsBtn" class="btn btn-secondary" title="Settings" style="display: flex; align-items: center; justify-content: center; padding: 0.5rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
               </button>
             </div>
+            </div>
           </div>
-        </div>
+          
+          <!-- Instruction Guide Card (Moved here) -->
+          <div class="instructions-card" style="margin-top: 1.5rem; background: rgba(10, 14, 26, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 12px;">
+            <h3>How to Play</h3>
+            
+            <div id="instructionsClaps">
+              <ol class="steps-list">
+                <li>
+                  <span class="step-num">1</span>
+                  <span>Allow webcam access and step back so your head and hands are visible.</span>
+                </li>
+                <li>
+                  <span class="step-num">2</span>
+                  <span>Raise both hands completely <strong>above your nose level</strong>.</span>
+                </li>
+                <li>
+                  <span class="step-num">3</span>
+                  <span>Bring your arms up and together in a <strong>half jumping jack motion</strong>.</span>
+                </li>
+                <li>
+                  <span class="step-num">4</span>
+                  <span>Lower your hands back to your sides to reset before repeating!</span>
+                </li>
+              </ol>
+            </div>
+
+            <div id="instructionsCircles" class="hidden">
+              <ol class="steps-list">
+                <li>
+                  <span class="step-num">1</span>
+                  <span>Allow webcam access and step back.</span>
+                </li>
+                <li>
+                  <span class="step-num">2</span>
+                  <span>Extend your arms <strong>straight out</strong>.</span>
+                </li>
+                <li>
+                  <span class="step-num">3</span>
+                  <span>Make <strong>large, continuous circles</strong> with your arms.</span>
+                </li>
+                <li>
+                  <span class="step-num">4</span>
+                  <span>Complete a full 360° rotation to score!</span>
+                </li>
+              </ol>
+            </div>
+          </div>
       </section>
 
       <!-- Right Sidebar (Tabbed) -->
@@ -185,17 +232,6 @@
             <p class="score-hint" id="scoreHint">Perform a half jumping jack to score +1</p>
           </div>
           
-          <!-- Daily Goal Calendar -->
-          <div class="telemetry-card" id="dailyGoalCard">
-            <h3>Star Log (Daily Goal)</h3>
-            <div class="daily-goal-header">
-              <span id="dailyGoalText">Today: 0 / 100 Points</span>
-            </div>
-            <div class="calendar-grid" id="calendarGrid">
-              <!-- Grid populated by JS -->
-            </div>
-          </div>
-          
           <!-- Upcoming Rewards Carousel -->
           <div id="nextRewardContainer" class="telemetry-card">
             <h3>Albums</h3>
@@ -205,6 +241,17 @@
                 <!-- Populated by JS -->
               </div>
               <button id="carouselNextBtn" class="carousel-nav-btn">❯</button>
+            </div>
+          </div>
+
+          <!-- Daily Goal Calendar -->
+          <div class="telemetry-card" id="dailyGoalCard">
+            <h3>Star Log (Daily Goal)</h3>
+            <div class="daily-goal-header">
+              <span id="dailyGoalText">Today: 0 / 100 Points</span>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+              <!-- Grid populated by JS -->
             </div>
           </div>
 
@@ -239,52 +286,7 @@
             </div>
           </div>
 
-          <!-- Instruction Guide Card -->
-          <div class="instructions-card">
-            <h3>How to Play</h3>
-            
-            <div id="instructionsClaps">
-              <ol class="steps-list">
-                <li>
-                  <span class="step-num">1</span>
-                  <span>Allow webcam access and step back so your head and hands are visible.</span>
-                </li>
-                <li>
-                  <span class="step-num">2</span>
-                  <span>Raise both hands completely <strong>above your nose level</strong>.</span>
-                </li>
-                <li>
-                  <span class="step-num">3</span>
-                  <span>Bring your wrists together in a <strong>clapping motion</strong>.</span>
-                </li>
-                <li>
-                  <span class="step-num">4</span>
-                  <span>Lower your hands to reset before clapping again!</span>
-                </li>
-              </ol>
-            </div>
 
-            <div id="instructionsCircles" class="hidden">
-              <ol class="steps-list">
-                <li>
-                  <span class="step-num">1</span>
-                  <span>Allow webcam access and step back.</span>
-                </li>
-                <li>
-                  <span class="step-num">2</span>
-                  <span>Extend your arms <strong>straight out</strong>.</span>
-                </li>
-                <li>
-                  <span class="step-num">3</span>
-                  <span>Make <strong>large, continuous circles</strong> with your arms.</span>
-                </li>
-                <li>
-                  <span class="step-num">4</span>
-                  <span>Complete a full 360° rotation to score!</span>
-                </li>
-              </ol>
-            </div>
-          </div>
         </div>
 
         <!-- Tab 2: Rewards -->
