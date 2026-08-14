@@ -18,57 +18,6 @@
 </head>
 <body>
   <div id="app" class="app-container">
-    <!-- Header Navbar -->
-    <header class="app-header">
-      
-      <!-- Brand Logo -->
-      <div class="logo">
-        <div class="logo-text">
-          <h1><span class="brand-cosmic">Cosmic</span><span class="brand-fit">Fit</span></h1>
-        </div>
-      </div>
-
-      <!-- Constellation Progress -->
-      <div class="constellation-progress-container" id="constellationBtn">
-        <div class="progress-stats">
-          <span id="levelText" class="level-text">Level 1</span>
-          <span id="xpText" class="xp-text">0/1000 XP</span>
-        </div>
-        <div class="progress-bar-svg-wrapper">
-          <svg width="100%" height="40" viewBox="0 0 400 40" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#00f2fe" />
-                <stop offset="50%" stop-color="#4facfe" />
-                <stop offset="100%" stop-color="#FA9D28" />
-              </linearGradient>
-              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-            <!-- Background Track -->
-            <path d="M 10,30 Q 80,10 200,20 T 390,10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6" stroke-linecap="round" />
-            <!-- Active Progress Path -->
-            <path id="progressPath" d="M 10,30 Q 80,10 200,20 T 390,10" fill="none" stroke="url(#progressGradient)" stroke-width="6" stroke-linecap="round" filter="url(#glow)" stroke-dasharray="400" stroke-dashoffset="400" />
-          </svg>
-          <div class="star-decorations">
-            <div class="tiny-star" style="left: 10%; top: 20%;">✨</div>
-            <div class="tiny-star" style="left: 30%; top: 60%; color: #FA9D28">✨</div>
-            <div class="tiny-star" style="left: 50%; top: 10%;">✨</div>
-            <div class="tiny-star" style="left: 70%; top: 80%;">✨</div>
-            <div class="tiny-star" style="left: 90%; top: 30%; color: #00f2fe">✨</div>
-          </div>
-        </div>
-        
-      </div>
-
-
-    </header>
-
     <!-- Main Content Area -->
     <main class="main-content">
       <!-- Left / Top: Viewport Container -->
@@ -136,7 +85,49 @@
           <!-- Action Buttons Below Camera -->
           <div class="camera-controls-bottom">
             
-            <div class="controls-row">
+            <div class="controls-row full-width-row">
+              <!-- Constellation Progress -->
+              <div class="constellation-progress-container" id="constellationBtn">
+                <div class="progress-bar-svg-wrapper">
+                  <svg width="100%" height="40" viewBox="0 0 400 40" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#00f2fe" />
+                        <stop offset="50%" stop-color="#4facfe" />
+                        <stop offset="100%" stop-color="#FA9D28" />
+                      </linearGradient>
+                      <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feMerge>
+                          <feMergeNode in="blur" />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
+                    </defs>
+                    <!-- Background Track -->
+                    <path d="M 10,30 Q 80,10 200,20 T 390,10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6" stroke-linecap="round" />
+                    <!-- Active Progress Path -->
+                    <path id="progressPath" d="M 10,30 Q 80,10 200,20 T 390,10" fill="none" stroke="url(#progressGradient)" stroke-width="6" stroke-linecap="round" filter="url(#glow)" stroke-dasharray="400" stroke-dashoffset="400" />
+                  </svg>
+                  <div class="star-decorations">
+                    <div class="tiny-star" style="left: 10%; top: 20%;">✨</div>
+                    <div class="tiny-star" style="left: 30%; top: 60%; color: #FA9D28">✨</div>
+                    <div class="tiny-star" style="left: 50%; top: 10%;">✨</div>
+                    <div class="tiny-star" style="left: 70%; top: 80%;">✨</div>
+                    <div class="tiny-star" style="left: 90%; top: 30%; color: #00f2fe">✨</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="controls-row center-items">
+              <!-- Brand Logo -->
+              <div class="logo">
+                <div class="logo-text">
+                  <h1><span class="brand-cosmic">Cosmic</span><span class="brand-fit">Fit</span></h1>
+                </div>
+              </div>
+
               <div class="segmented-control" id="exerciseSelect">
                 <button class="segment-btn active" data-value="claps">Half Jumping Jacks</button>
                 <button class="segment-btn" data-value="circles">Arm Circles</button>
@@ -150,7 +141,7 @@
               </div>
             </div>
 
-            <div class="controls-row">
+            <div class="controls-row justify-center">
               <button id="timerBtn" class="btn btn-secondary" title="1 Min Challenge">
                 <span id="timerBtnText">Start</span>
               </button>
@@ -158,14 +149,13 @@
               <button id="soundToggleBtn" class="btn btn-secondary" title="Toggle Sound">
                 <span id="soundBtnText">Audio On</span>
               </button>
-              <button id="resetScoreBtn" class="btn btn-secondary" title="Reset Score">
+              <button id="resetScoreBtn" class="btn btn-danger" title="Reset Session Score">
                 Reset
               </button>
               <button id="cameraToggleBtn" class="btn btn-primary" title="Start/Stop Camera">
                 <span id="cameraBtnText">Start Camera</span>
               </button>
             </div>
-            
           </div>
         </div>
       </section>
@@ -203,6 +193,18 @@
             </div>
           </div>
           
+          <!-- Upcoming Rewards Carousel -->
+          <div id="nextRewardContainer" class="telemetry-card">
+            <h3>Albums</h3>
+            <div class="carousel-wrapper">
+              <button id="carouselPrevBtn" class="carousel-nav-btn">❮</button>
+              <div id="nextRewardContent">
+                <!-- Populated by JS -->
+              </div>
+              <button id="carouselNextBtn" class="carousel-nav-btn">❯</button>
+            </div>
+          </div>
+
           <!-- Real-time Telemetry & Calibration Gauges -->
           <div class="telemetry-card">
             <h3>Gesture Telemetry</h3>
@@ -231,18 +233,6 @@
                 <div id="meterTwoMarker" class="meter-threshold-marker" style="left: 50%" title="Target Threshold"></div>
               </div>
               <div class="meter-subtext" id="meterTwoSubtext">Both wrists must rise above nose (Y &lt; Nose Y)</div>
-            </div>
-          </div>
-          
-          <!-- Upcoming Rewards Carousel -->
-          <div id="nextRewardContainer" class="telemetry-card">
-            <h3>Albums</h3>
-            <div class="carousel-wrapper">
-              <button id="carouselPrevBtn" class="carousel-nav-btn">❮</button>
-              <div id="nextRewardContent">
-                <!-- Populated by JS -->
-              </div>
-              <button id="carouselNextBtn" class="carousel-nav-btn">❯</button>
             </div>
           </div>
 
@@ -311,6 +301,7 @@
             <div class="sticker-book-grid" id="milestoneList">
               <!-- Populated via JS -->
             </div>
+            <button id="resetDailyBtn" class="btn btn-danger" style="margin-top: 1.5rem; width: 100%;">Reset Daily Score</button>
           </div>
         </div>
 

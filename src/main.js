@@ -36,22 +36,36 @@ function updateProgressionUI() {
   const milestoneList = document.getElementById('milestoneList');
   const nextRewardContent = document.getElementById('nextRewardContent');
   
-  if(levelText) levelText.textContent = `Level ${level}`;
-  if(xpText) xpText.textContent = `${xp}/${xpPerLevel} XP`;
+  // Get today's score
+  let dailyScores = JSON.parse(localStorage.getItem('cosmicfit_daily_scores') || '{}');
+  let todayStr = getTodayString();
+  let todayScore = dailyScores[todayStr] || 0;
+  
+  let currentTargetIndex = milestonesData.findIndex(m => todayScore < m.target);
+  let progressPercent = 1;
+  let targetM = null;
+  
+  if (currentTargetIndex !== -1) {
+    targetM = milestonesData[currentTargetIndex];
+    const prevTarget = currentTargetIndex === 0 ? 0 : milestonesData[currentTargetIndex-1].target;
+    const targetDiff = targetM.target - prevTarget;
+    const scoreInCurrent = todayScore - prevTarget;
+    progressPercent = scoreInCurrent / targetDiff;
+  } else {
+    currentTargetIndex = milestonesData.length - 1; // maxed out
+    targetM = milestonesData[currentTargetIndex];
+  }
+
+  if(levelText) levelText.textContent = targetM.name;
+  if(xpText) xpText.textContent = `${todayScore}/${targetM.target} Stars`;
   
   if(progressPath) {
-    const progressPercent = Math.min(xp / xpPerLevel, 1);
     const dashOffset = 400 - (progressPercent * 400);
     progressPath.style.strokeDashoffset = dashOffset;
   }
 
   if (milestoneList) {
     const isFirstRender = milestoneList.children.length === 0;
-    
-    // Get today's score
-    let dailyScores = JSON.parse(localStorage.getItem('cosmicfit_daily_scores') || '{}');
-    let todayStr = getTodayString();
-    let todayScore = dailyScores[todayStr] || 0;
     
     const rewardsScoreValue = document.getElementById('rewardsScoreValue');
     if (rewardsScoreValue) rewardsScoreValue.textContent = todayScore;
@@ -125,11 +139,10 @@ function updateProgressionUI() {
     });
 
     // After updating grid, update the carousel
-    if (carouselIndex === -1) {
-      // Find the first uncompleted milestone to set as initial index
-      carouselIndex = milestonesData.findIndex(m => score < m.target);
-      if (carouselIndex === -1) carouselIndex = 0;
+    if (carouselIndex === -1 || (window.lastTargetIndex !== undefined && window.lastTargetIndex !== currentTargetIndex)) {
+      carouselIndex = currentTargetIndex;
     }
+    window.lastTargetIndex = currentTargetIndex;
     updateCarouselUI();
   }
 }
@@ -927,30 +940,34 @@ cameraToggleBtn.addEventListener('click', () => {
 
 resetScoreBtn.addEventListener('click', () => {
   score = 0;
-  totalScore = 0;
-  localStorage.setItem('cosmicfit_total_score', '0');
-  localStorage.removeItem('cosmicfit_daily_scores');
-  
   scoreValue.textContent = '0';
-  if (rewardsScoreValue) rewardsScoreValue.textContent = '0';
-  
-  xp = 0;
-  level = 1;
-  isHandsClappedAboveHead = false;
   
   if (overlayTimerValue.textContent === "TIME'S UP!") {
     const activePill = document.querySelector('.pill-btn.active');
     timeLeft = activePill ? parseInt(activePill.dataset.value, 10) : 60;
     updateTimerDisplay();
   }
-  
-  updateProgressionUI();
-  scoreCard.classList.add('bounce');
-  
-  setTimeout(() => {
-    scoreCard.classList.remove('bounce');
-  }, 300);
 });
+
+const resetDailyBtn = document.getElementById('resetDailyBtn');
+if (resetDailyBtn) {
+  resetDailyBtn.addEventListener('click', () => {
+    if(confirm('Are you sure you want to reset all your daily progress and constellations?')) {
+      totalScore = 0;
+      localStorage.setItem('cosmicfit_total_score', '0');
+      localStorage.removeItem('cosmicfit_daily_scores');
+      
+      const rewardsScoreValue = document.getElementById('rewardsScoreValue');
+      if (rewardsScoreValue) rewardsScoreValue.textContent = '0';
+      
+      xp = 0;
+      level = 1;
+      
+      updateProgressionUI();
+      renderCalendar();
+    }
+  });
+}
 
 // Tab Switching Logic
 sidebarTabs.forEach(tab => {
