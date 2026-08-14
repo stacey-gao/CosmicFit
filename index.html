@@ -110,11 +110,11 @@
                     <path id="progressPath" d="M 10,30 Q 80,10 200,20 T 390,10" fill="none" stroke="url(#progressGradient)" stroke-width="6" stroke-linecap="round" filter="url(#glow)" stroke-dasharray="400" stroke-dashoffset="400" />
                   </svg>
                   <div class="star-decorations">
-                    <div class="tiny-star" style="left: 10%; top: 20%;">✨</div>
-                    <div class="tiny-star" style="left: 30%; top: 60%; color: #FA9D28">✨</div>
-                    <div class="tiny-star" style="left: 50%; top: 10%;">✨</div>
-                    <div class="tiny-star" style="left: 70%; top: 80%;">✨</div>
-                    <div class="tiny-star" style="left: 90%; top: 30%; color: #00f2fe">✨</div>
+                    <img src="/star_mascot.png" class="tiny-star-img" style="left: 10%; top: 20%;" />
+                    <img src="/star_mascot.png" class="tiny-star-img" style="left: 30%; top: 60%;" />
+                    <img src="/star_mascot.png" class="tiny-star-img" style="left: 50%; top: 10%;" />
+                    <img src="/star_mascot.png" class="tiny-star-img" style="left: 70%; top: 80%;" />
+                    <img src="/star_mascot.png" class="tiny-star-img" style="left: 90%; top: 30%;" />
                   </div>
                 </div>
               </div>
@@ -151,6 +151,9 @@
               </button>
               <button id="resetScoreBtn" class="btn btn-danger" title="Reset Session Score">
                 Reset
+              </button>
+              <button id="settingsBtn" class="btn btn-secondary" title="Settings">
+                ⚙️
               </button>
               <button id="cameraToggleBtn" class="btn btn-primary" title="Start/Stop Camera">
                 <span id="cameraBtnText">Start Camera</span>
@@ -307,6 +310,83 @@
 
       </aside>
     </main>
+  </div>
+
+  <!-- Name Prompt Modal -->
+  <div id="namePromptModal" class="name-prompt-overlay hidden">
+    <div class="name-prompt-card">
+      <div class="name-prompt-content">
+        <img src="/star_mascot.png" class="modal-star" alt="Star Mascot" />
+        <div class="name-prompt-form">
+          <h2>Let's start moving</h2>
+          <p>Choose a cosmic codename:</p>
+          
+          <div class="name-preset-options">
+            <button class="btn btn-outline name-preset-btn">Nova</button>
+            <button class="btn btn-outline name-preset-btn">Orion</button>
+          </div>
+          
+          <div class="name-or-divider">
+            <span>OR</span>
+          </div>
+
+          <input type="text" id="namePromptInput" placeholder="Enter your own name..." maxlength="20" />
+          <button id="namePromptSubmit" class="btn btn-primary">Start Journey</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="name-prompt-overlay hidden">
+    <div class="name-prompt-card">
+      <div class="name-prompt-content">
+        <img src="/star_mascot.png" class="modal-star" alt="Star Mascot" />
+        <div class="name-prompt-form">
+          <h2>Settings</h2>
+          <p>Update your codename or manage data:</p>
+          
+          <input type="text" id="settingsNameInput" placeholder="Enter new name..." maxlength="20" style="margin-bottom: 0.5rem;" />
+          <button id="settingsUpdateNameBtn" class="btn btn-primary" style="margin-bottom: 1.5rem;">Update Name</button>
+          
+          <div class="name-or-divider">
+            <span>DATA</span>
+          </div>
+
+          <button id="settingsExportBtn" class="btn btn-outline" style="margin-bottom: 0.5rem;">Export Data (Download)</button>
+          <label class="btn btn-outline" style="cursor: pointer; margin-bottom: 1.5rem; text-align: center;">
+            Import Data (Upload)
+            <input type="file" id="settingsImportInput" accept=".json" style="display: none;" />
+          </label>
+          
+          <button id="settingsCloseBtn" class="btn btn-danger">Close Settings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mascot Container -->
+  <div id="mascotContainer" class="mascot-container">
+    <div class="mascot-trail">
+      <!-- Animated SVG trail for the swoosh -->
+      <svg width="200" height="150" viewBox="0 0 200 150" class="trail-svg">
+        <path d="M 0,150 Q 80,100 200,20" fill="none" stroke="url(#trailGradient)" stroke-width="12" stroke-linecap="round" />
+        <defs>
+          <linearGradient id="trailGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="rgba(250, 157, 40, 0)" />
+            <stop offset="70%" stop-color="rgba(250, 157, 40, 0.6)" />
+            <stop offset="100%" stop-color="rgba(255, 255, 255, 0.9)" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="mascot-character">
+      <!-- Star Mascot SVG -->
+      <img src="/star_mascot.png" class="mascot-img" alt="Star Mascot" />
+    </div>
+    <div class="mascot-speech-bubble" id="mascotSpeechBubble">
+      <span id="mascotGreetingText">Welcome back!</span>
+    </div>
   </div>
 
   <script type="module" src="/src/main.js"></script>

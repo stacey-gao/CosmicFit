@@ -1227,3 +1227,153 @@ function renderCalendar(scores) {
     calendarGrid.appendChild(cell);
   }
 }
+
+// --- Mascot Personalization Logic ---
+function initMascot() {
+  const username = localStorage.getItem('cosmicfit_username');
+  if (!username) {
+    // Show Modal
+    const modal = document.getElementById('namePromptModal');
+    const input = document.getElementById('namePromptInput');
+    const submit = document.getElementById('namePromptSubmit');
+    
+    if(modal) modal.classList.remove('hidden');
+    
+    if(submit) {
+      submit.addEventListener('click', () => {
+        const val = input.value.trim();
+        if(val) {
+          localStorage.setItem('cosmicfit_username', val);
+          modal.classList.add('hidden');
+          triggerMascotGreeting(val, true);
+        }
+      });
+    }
+    
+    const presetBtns = document.querySelectorAll('.name-preset-btn');
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = btn.textContent.trim();
+        localStorage.setItem('cosmicfit_username', val);
+        modal.classList.add('hidden');
+        triggerMascotGreeting(val, true);
+      });
+    });
+  } else {
+    // Wait a little bit on load before popping up
+    setTimeout(() => {
+      triggerMascotGreeting(username, false);
+    }, 1000);
+  }
+}
+
+function triggerMascotGreeting(name, isFirstTime) {
+  const container = document.getElementById('mascotContainer');
+  const speechBubble = document.getElementById('mascotSpeechBubble');
+  const greetingText = document.getElementById('mascotGreetingText');
+  
+  if(!container || !speechBubble || !greetingText) return;
+  
+  if(isFirstTime) {
+    greetingText.textContent = `Welcome, ${name}! Ready to map the stars?`;
+  } else {
+    greetingText.textContent = `Welcome back, ${name}!`;
+  }
+  
+  // Start the swoosh in
+  container.classList.add('swoosh-in');
+  
+  // Pop the bubble after it lands (animation is 1.5s)
+  setTimeout(() => {
+    speechBubble.classList.add('show');
+  }, 1500);
+  
+  // Hide everything after 6 seconds
+  setTimeout(() => {
+    speechBubble.classList.remove('show');
+    container.classList.remove('swoosh-in');
+    container.classList.add('swoosh-out');
+    
+    // Clean up classes after swoop out
+    setTimeout(() => {
+      container.classList.remove('swoosh-out');
+    }, 1000);
+  }, 6000);
+}
+
+// --- Settings & Data Management Logic ---
+function initSettings() {
+  const settingsBtn = document.getElementById('settingsBtn');
+  const modal = document.getElementById('settingsModal');
+  const closeBtn = document.getElementById('settingsCloseBtn');
+  const updateNameBtn = document.getElementById('settingsUpdateNameBtn');
+  const nameInput = document.getElementById('settingsNameInput');
+  const exportBtn = document.getElementById('settingsExportBtn');
+  const importInput = document.getElementById('settingsImportInput');
+
+  if(settingsBtn && modal) {
+    settingsBtn.addEventListener('click', () => {
+      nameInput.value = localStorage.getItem('cosmicfit_username') || '';
+      modal.classList.remove('hidden');
+    });
+  }
+
+  if(closeBtn && modal) {
+    closeBtn.addEventListener('click', () => {
+      modal.classList.add('hidden');
+    });
+  }
+
+  if(updateNameBtn) {
+    updateNameBtn.addEventListener('click', () => {
+      const val = nameInput.value.trim();
+      if(val) {
+        localStorage.setItem('cosmicfit_username', val);
+        triggerMascotGreeting(val, false);
+        modal.classList.add('hidden');
+      }
+    });
+  }
+
+  if(exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const data = {
+        username: localStorage.getItem('cosmicfit_username'),
+        scores: localStorage.getItem('cosmicfit_daily_scores')
+      };
+      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'cosmicfit_data.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  if(importInput) {
+    importInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target.result);
+          if(data.username) localStorage.setItem('cosmicfit_username', data.username);
+          if(data.scores) localStorage.setItem('cosmicfit_daily_scores', data.scores);
+          alert('Data imported successfully! The page will now reload.');
+          location.reload();
+        } catch(err) {
+          alert('Invalid file format. Please upload a valid Cosmic Fit data file.');
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
+}
+
+// Call initMascot on load
+window.addEventListener('DOMContentLoaded', () => {
+  initMascot();
+  initSettings();
+});
