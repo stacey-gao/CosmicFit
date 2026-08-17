@@ -173,6 +173,7 @@ const canvas = document.getElementById('skeletonCanvas');
 const ctx = canvas.getContext('2d');
 
 const scoreValue = document.getElementById('scoreValue');
+const mobileScoreValue = document.getElementById('mobileScoreValue');
 const scoreCard = document.getElementById('scoreCard');
 const resetScoreBtn = document.getElementById('resetScoreBtn');
 const cameraToggleBtn = document.getElementById('cameraToggleBtn');
@@ -365,6 +366,7 @@ function incrementScore(particleX, particleY) {
   localStorage.setItem('cosmicfit_total_score', totalScore.toString());
   
   scoreValue.textContent = score;
+  if (mobileScoreValue) mobileScoreValue.textContent = score;
   
   updateDailyScore();
   
@@ -870,7 +872,7 @@ async function startCamera() {
     animFrameId = requestAnimationFrame(processWebcamLoop);
 
     cameraBtnText.textContent = 'Stop Camera';
-    cameraToggleBtn.classList.replace('btn-primary', 'btn-secondary');
+    cameraToggleBtn.classList.remove('hidden');
     
     const centerOverlay = document.getElementById('centerCameraBtnOverlay');
     if (centerOverlay) centerOverlay.classList.add('hidden');
@@ -919,8 +921,8 @@ function stopCamera() {
 
   webcam.srcObject = null;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  cameraBtnText.textContent = 'Start Camera';
-  cameraToggleBtn.classList.replace('btn-secondary', 'btn-primary');
+  cameraBtnText.textContent = 'Stop Camera';
+  cameraToggleBtn.classList.add('hidden');
     
   const centerOverlay = document.getElementById('centerCameraBtnOverlay');
   if (centerOverlay) centerOverlay.classList.remove('hidden');
@@ -952,6 +954,7 @@ if (centerCameraBtn) {
 resetScoreBtn.addEventListener('click', () => {
   score = 0;
   scoreValue.textContent = '0';
+  if (mobileScoreValue) mobileScoreValue.textContent = '0';
   
   if (overlayTimerValue.textContent === "TIME'S UP!") {
     const activePill = document.querySelector('.pill-btn.active');
@@ -1010,6 +1013,7 @@ function startTimer() {
   // Reset score for the challenge
   score = 0;
   scoreValue.textContent = '0';
+  if (mobileScoreValue) mobileScoreValue.textContent = '0';
   if (rewardsScoreValue) rewardsScoreValue.textContent = '0';
   isHandsClappedAboveHead = false;
   

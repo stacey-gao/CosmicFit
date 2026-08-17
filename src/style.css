@@ -263,64 +263,6 @@ body {
   display: flex; /* Always show overlay score */
 }
 
-@media (max-width: 1024px) {
-  .main-content {
-    grid-template-columns: 1fr;
-  }
-  
-  .app-container {
-    padding: 1rem 0.5rem;
-  }
-
-  .app-header {
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
-    padding: 1rem 0.5rem;
-  }
-
-  .header-actions {
-    width: 100%;
-    justify-content: center;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .right-sidebar {
-    width: 100%;
-  }
-  
-  .controls-row > * {
-    flex: 1 1 auto;
-    min-width: calc(40% - 1rem);
-  }
-
-  .btn {
-    padding: 0.75rem 1rem;
-  }
-
-  .overlay-score {
-    font-size: 3rem;
-    top: 1rem;
-  }
-  
-  .milestone-item {
-    flex-direction: column;
-    text-align: center;
-    padding: 1rem 0.5rem;
-  }
-  
-  .milestone-info-header {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .milestone-sticker {
-    margin-top: 0.5rem;
-  }
-}
-
 /* Overlay Score for Focus Mode */
 .overlay-score {
   display: none;
@@ -436,14 +378,6 @@ body {
   align-items: center;
   justify-content: center;
 }
-
-@media (max-width: 1024px) {
-  .media-container {
-    aspect-ratio: auto;
-    height: 45vh;
-  }
-}
-
 /* Mirrored Video & Canvas Overlay */
 #webcam, #skeletonCanvas {
   position: absolute;
@@ -486,8 +420,15 @@ body {
 }
 
 .status-idle {
-  background: rgba(15, 23, 42, 0.8);
-  color: var(--text-muted);
+  background: rgba(10, 14, 26, 0.85);
+  color: #e2e8f0;
+  border: 1px solid rgba(78, 142, 255, 0.3);
+  box-shadow: 0 0 15px rgba(78, 142, 255, 0.1);
+}
+
+.status-idle .status-dot {
+  background: var(--primary);
+  box-shadow: 0 0 8px var(--primary);
 }
 
 .status-tracking {
@@ -1257,11 +1198,12 @@ body {
   bottom: 5%;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(10, 14, 26, 0.85);
   backdrop-filter: blur(8px);
   padding: 0.75rem 1.5rem;
   border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(78, 142, 255, 0.4);
+  box-shadow: 0 0 20px rgba(78, 142, 255, 0.2);
   color: #fff;
   font-family: var(--font-heading);
   font-size: 1.1rem;
@@ -1276,13 +1218,15 @@ body {
 }
 
 kbd {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 2px 6px;
+  background: linear-gradient(180deg, rgba(78, 142, 255, 0.2), rgba(78, 142, 255, 0.05));
+  border-radius: 6px;
+  border: 1px solid var(--primary);
+  padding: 3px 8px;
   font-family: monospace;
-  box-shadow: 0 2px 0 rgba(255, 255, 255, 0.1);
-  color: var(--primary);
+  box-shadow: 0 2px 0 var(--primary), 0 0 8px rgba(78, 142, 255, 0.3);
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 0 5px var(--primary);
 }
 
 /* Demo Animation */
@@ -1660,4 +1604,141 @@ kbd {
 
 @keyframes bubblePop {
   to { opacity: 1; transform: scale(1); }
+}
+
+/* Mobile Score Display */
+.mobile-score-display {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.25rem 1rem;
+  border-radius: 20px;
+  border: 1px solid var(--primary);
+  box-shadow: 0 0 10px rgba(78, 142, 255, 0.2);
+}
+
+.mobile-score-label {
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 1px;
+}
+
+.mobile-score-value {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .app-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .app-header {
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    padding: 1rem 0.5rem;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .right-sidebar {
+    width: 100%;
+  }
+  
+  .controls-row > * {
+    flex: 1 1 auto;
+    min-width: calc(40% - 1rem);
+  }
+
+  .btn {
+    padding: 0.75rem 1rem;
+  }
+
+  .overlay-score {
+    font-size: 3rem;
+    top: 1rem;
+  }
+  
+  .milestone-item {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem 0.5rem;
+  }
+  
+  .milestone-info-header {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .milestone-sticker {
+    margin-top: 0.5rem;
+  }
+
+  .media-container {
+    aspect-ratio: auto;
+    height: 45vh;
+  }
+
+  .mobile-score-display {
+    display: flex;
+    margin-left: auto;
+  }
+
+  #scoreCard {
+    display: none;
+  }
+}
+
+/* Mobile Responsiveness Fixes */
+@media (max-width: 600px) {
+  .app-container {
+    padding: 0.5rem;
+    gap: 1rem;
+  }
+  
+  .main-content {
+    gap: 1rem;
+  }
+  
+  .media-container {
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+  
+  .controls-row > * {
+    min-width: 0 !important;
+    flex: 0 1 auto;
+  }
+  
+  #cameraToggleBtn, #timerBtn {
+    flex: 1 1 100%;
+  }
+
+  #soundToggleBtn, #resetScoreBtn {
+    flex: 1 1 auto;
+  }
+
+  #settingsBtn {
+    flex: 0 0 auto;
+  }
+  
+  .telemetry-card, .instructions-card {
+    padding: 1rem;
+  }
 }

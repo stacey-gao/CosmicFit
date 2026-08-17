@@ -60,6 +60,13 @@
               </div>
             </div>
 
+            <!-- Center Camera Button Overlay -->
+            <div id="centerCameraBtnOverlay" class="center-camera-btn-overlay">
+              <button id="centerCameraBtn" class="btn btn-primary" style="font-size: 1.5rem; padding: 1rem 2rem; box-shadow: 0 0 20px rgba(78, 142, 255, 0.5);">
+                Start Camera
+              </button>
+            </div>
+
             <!-- Keyboard Hints Overlay -->
             <div id="keyboardHintOverlay" class="keyboard-hint-overlay">
               <span id="keyboardHintText">Press <kbd>C</kbd> to Start Camera</span>
@@ -139,11 +146,17 @@
                 <button class="pill-btn" data-value="120">2m</button>
                 <button class="pill-btn" data-value="300">5m</button>
               </div>
+
+              <!-- Mobile Score Display (Hidden on Desktop) -->
+              <div class="mobile-score-display" id="mobileScoreDisplay">
+                <span class="mobile-score-label">SCORE</span>
+                <span class="mobile-score-value" id="mobileScoreValue">0</span>
+              </div>
             </div>
 
             <div class="controls-row justify-center">
-              <button id="cameraToggleBtn" class="btn btn-primary" title="Start/Stop Camera">
-                <span id="cameraBtnText">Start Camera</span>
+              <button id="cameraToggleBtn" class="btn btn-danger hidden" title="Stop Camera">
+                <span id="cameraBtnText">Stop Camera</span>
               </button>
               <button id="timerBtn" class="btn btn-secondary" title="1 Min Challenge">
                 <span id="timerBtnText">Start Timer</span>
@@ -163,7 +176,7 @@
           </div>
           
           <!-- Instruction Guide Card (Moved here) -->
-          <div class="instructions-card" style="margin-top: 1.5rem; background: rgba(10, 14, 26, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 12px;">
+          <div class="instructions-card">
             <h3>How to Play</h3>
             
             <div id="instructionsClaps">
