@@ -60,8 +60,21 @@ function updateProgressionUI() {
   if(xpText) xpText.textContent = `${todayScore}/${targetM.target} Stars`;
   
   if(progressPath) {
-    const dashOffset = 400 - (progressPercent * 400);
+    const pathLength = progressPath.getTotalLength() || 332;
+    progressPath.style.strokeDasharray = pathLength;
+    const dashOffset = pathLength - (progressPercent * pathLength);
     progressPath.style.strokeDashoffset = dashOffset;
+    
+    // Light up the stars as the line passes through
+    const stars = document.querySelectorAll('.tiny-star-svg');
+    const thresholds = [0.0, 0.24, 0.49, 0.74, 0.99]; // Approximate percentages along the path
+    stars.forEach((star, index) => {
+      if (progressPercent >= thresholds[index]) {
+        star.classList.add('star-active');
+      } else {
+        star.classList.remove('star-active');
+      }
+    });
   }
 
   if (milestoneList) {
@@ -1232,6 +1245,9 @@ function renderCalendar(scores) {
     cell.setAttribute('data-tooltip', `${d.toDateString()}: ${s} Points`);
     
     cell.textContent = d.getDate();
+    
+    const progressPct = Math.min((s / DAILY_GOAL) * 100, 100);
+    cell.style.setProperty('--progress', `${progressPct}%`);
     
     if (s >= DAILY_GOAL) {
       cell.classList.add('completed');

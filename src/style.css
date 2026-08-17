@@ -432,27 +432,29 @@ body {
 }
 
 .status-tracking {
-  background: rgba(16, 185, 129, 0.25);
-  color: #34d399;
-  border-color: rgba(52, 211, 153, 0.4);
+  background: rgba(10, 14, 26, 0.85);
+  color: #00f2fe;
+  border-color: rgba(0, 242, 254, 0.5);
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
 }
 
 .status-tracking .status-dot {
-  background: #34d399;
-  box-shadow: 0 0 8px #34d399;
+  background: #00f2fe;
+  box-shadow: 0 0 8px #00f2fe;
   animation: blink 1.5s infinite;
 }
 
 .status-active {
-  background: rgba(236, 72, 153, 0.3);
-  color: #f472b6;
-  border-color: rgba(244, 114, 182, 0.5);
+  background: rgba(10, 14, 26, 0.85);
+  color: var(--accent-orange);
+  border-color: rgba(250, 157, 40, 0.5);
+  box-shadow: 0 0 20px rgba(250, 157, 40, 0.4);
   animation: pulse-border 1s infinite alternate;
 }
 
 .status-active .status-dot {
-  background: #ff007f;
-  box-shadow: 0 0 10px #ff007f;
+  background: var(--accent-orange);
+  box-shadow: 0 0 10px var(--accent-orange);
 }
 
 /* Target Banner Overlay */
@@ -461,15 +463,17 @@ body {
   top: 1rem;
   right: 1rem;
   z-index: 10;
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
-  color: #fff;
+  background: rgba(10, 14, 26, 0.85);
+  backdrop-filter: blur(12px);
+  color: var(--accent-orange);
+  border: 1px solid var(--accent-orange);
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 1.2rem;
   letter-spacing: 0.5px;
   padding: 0.75rem 1.25rem;
   border-radius: 30px;
-  box-shadow: 0 0 20px rgba(255, 0, 127, 0.6);
+  box-shadow: 0 0 20px rgba(250, 157, 40, 0.4);
   animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -668,11 +672,6 @@ body {
   gap: 0.2rem;
   width: 100%;
   border-radius: 12px;
-  transition: background 0.2s;
-}
-
-.constellation-progress-container:hover {
-  background: rgba(255, 255, 255, 0.02);
 }
 
 .progress-stats {
@@ -704,15 +703,35 @@ body {
   pointer-events: none;
 }
 
-.tiny-star, .tiny-star-img {
+.tiny-star, .tiny-star-svg {
   position: absolute;
-  animation: blink 2s infinite alternate;
+  animation: pulse-glow 2s infinite alternate;
 }
 .tiny-star { font-size: 0.6rem; }
-.tiny-star-img {
-  width: 15px;
-  height: 15px;
-  object-fit: cover;
+
+.tiny-star-svg {
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 0 5px rgba(0, 242, 254, 0.8));
+}
+
+@keyframes pulse-glow {
+  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.7; filter: drop-shadow(0 0 3px rgba(0, 242, 254, 0.5)); }
+  100% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.9)); }
+}
+
+.tiny-star-svg.star-active path {
+  fill: var(--accent-orange);
+}
+
+.tiny-star-svg.star-active {
+  animation: pulse-glow-orange 1.5s infinite alternate;
+}
+
+@keyframes pulse-glow-orange {
+  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.8; filter: drop-shadow(0 0 5px var(--accent-orange)); }
+  100% { transform: translate(-50%, -50%) scale(1.25); opacity: 1; filter: drop-shadow(0 0 15px var(--accent-orange)); }
 }
 
 #progressPath {
@@ -1329,29 +1348,42 @@ kbd {
 .day-cell {
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
   position: relative;
   transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.day-cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--ring-color, rgba(255, 255, 255, 0.1)) var(--progress, 0%), 
+    rgba(255, 255, 255, 0.05) 0%
+  );
+  -webkit-mask: radial-gradient(closest-side, transparent 85%, black 86%);
+  mask: radial-gradient(closest-side, transparent 85%, black 86%);
+  z-index: -1;
+  transition: background 0.5s ease;
 }
 
 .day-cell.partial {
-  background: rgba(0, 242, 254, 0.15);
-  border-color: rgba(0, 242, 254, 0.4);
-  color: rgba(0, 242, 254, 0.8);
+  --ring-color: var(--primary);
+  color: #fff;
 }
 
 .day-cell.completed {
-  background: var(--accent-orange);
-  border-color: var(--accent-orange);
+  --ring-color: var(--accent-orange);
   color: #fff;
   font-weight: bold;
-  box-shadow: 0 0 10px rgba(250, 157, 40, 0.6);
+  text-shadow: 0 0 5px rgba(250, 157, 40, 0.5);
   animation: pulse-star 2s infinite alternate;
 }
 
