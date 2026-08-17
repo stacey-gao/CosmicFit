@@ -372,6 +372,10 @@ function updateAndDrawParticles() {
 function incrementScore(particleX, particleY) {
   // Optional: prevent scoring when timer hasn't started
   if (!isTimerActive && overlayTimerValue.textContent === "TIME'S UP!") return;
+  
+  // Hide the "Press Space to Start Timer" hint once they start scoring
+  keyboardHintOverlay.classList.add('hidden');
+  
   console.log("Scoring! Current score:", score + 1);
 
   score += 1;
@@ -566,7 +570,7 @@ function trackOverheadClaps(landmarks) {
     meterOneFill.className = 'meter-bar-fill meter-blue';
   }
 
-  meterTwoValue.textContent = isOverhead ? 'YES 🙌' : 'NO';
+  meterTwoValue.textContent = isOverhead ? 'YES' : 'NO';
   const noseY = nose.y;
   const avgWristY = (leftWrist.y + rightWrist.y) / 2;
   const heightDiff = noseY - avgWristY; 
@@ -582,9 +586,9 @@ function trackOverheadClaps(landmarks) {
       incrementScore(midWristPxX, midWristPxY);
     }
     poseStatusBadge.className = 'status-badge status-active';
-    statusText.textContent = 'SCORED! 🙌 Lower hands or separate them to score again.';
+    statusText.textContent = 'SCORED! Lower hands or separate them to score again.';
     targetBanner.classList.remove('hidden');
-    targetBanner.innerHTML = '<span>🙌 HALF JUMPING JACK DETECTED</span>';
+    targetBanner.innerHTML = '<span>HALF JUMPING JACK</span>';
   } else {
     if (!isOverhead || !isClapped) {
       isHandsClappedAboveHead = false;
@@ -746,9 +750,9 @@ function trackArmCircles(landmarks) {
     incrementScore(midPxX, midPxY);
     
     poseStatusBadge.className = 'status-badge status-active';
-    statusText.textContent = 'SCORED! 🙌 Keep spinning!';
+    statusText.textContent = 'SCORED! Keep spinning!';
     targetBanner.classList.remove('hidden');
-    targetBanner.innerHTML = '<span>🙌 FULL CIRCLE COMPLETED</span>';
+    targetBanner.innerHTML = '<span>FULL CIRCLE</span>';
   } else {
     poseStatusBadge.className = leftState.valid || rightState.valid ? 'status-badge status-tracking' : 'status-badge status-idle';
     statusText.textContent = (!leftState.valid && !rightState.valid) ? leftState.reason : 'Circling...';
